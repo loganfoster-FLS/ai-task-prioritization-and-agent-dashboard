@@ -1,0 +1,26 @@
+{
+  "name": "command-dashboard",
+  "version": "1.0.0",
+  "description": "AI Command Dashboard",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.dashboard.command",
+    "productName": "Dashboard",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": "dmg"
+    },
+    "files": [
+      "main.js",
+      "command-dashboard.html"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  }
+}

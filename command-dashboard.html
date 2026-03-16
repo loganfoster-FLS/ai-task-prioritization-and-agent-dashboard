@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Command Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #f5f4f1;
+    --surface:   #ffffff;
+    --surface-2: #f9f8f6;
+    --border:    #e8e6e1;
+    --border-2:  #d4d0c8;
+    --text-1:    #1a1917;
+    --text-2:    #6b6760;
+    --text-3:    #a8a49c;
+    --green:     #2d7a4f;
+    --green-bg:  #edf6f1;
+    --amber:     #a05c1a;
+    --amber-bg:  #fdf3e7;
+    --red:       #b83232;
+    --red-bg:    #fcecec;
+    --blue:      #1e5fa6;
+    --blue-bg:   #eaf1fc;
+    --radius:    8px;
+    --gap:       12px;
+    --hh:        54px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-1);
+    min-height: 100vh;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── HEADER ── */
+  header {
+    height: var(--hh);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  .h-brand  { font-size: 15px; font-weight: 600; color: var(--text-1); letter-spacing: -.01em; }
+  .h-date   { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-3); }
+  .h-div    { width: 1px; height: 20px; background: var(--border); }
+  .h-pill   {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 500; color: var(--text-2);
+    cursor: pointer; padding: 3px 7px; border-radius: 5px;
+    transition: background .12s, color .12s;
+    border: 1px solid transparent;
+  }
+  .h-pill:hover { background: var(--surface-2); border-color: var(--border); color: var(--text-1); }
+  .h-dot    { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .h-dot.on { background: var(--green); animation: blink 2s infinite; }
+  .h-dot.off{ background: var(--border-2); }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .h-right  { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .h-clock  { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-3); }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn:hover   { background: var(--surface-2); border-color: var(--border-2); color: var(--text-1); }
+  .btn.primary { background: var(--text-1); color: #fff; border-color: var(--text-1); }
+  .btn.primary:hover { background: #333; }
+  .btn.active  { background: var(--text-1); color: #fff; border-color: var(--text-1); }
+
+  /* ── EDIT BANNER ── */
+  .edit-banner {
+    display: none;
+    background: #fffbf2;
+    border-bottom: 1px solid #f0e0c0;
+    text-align: center; padding: 7px;
+    font-size: 12px; font-weight: 500; color: var(--amber);
+  }
+  body.editing .edit-banner { display: block; }
+
+  /* ── COLUMNS ── */
+  .dash-cols {
+    display: flex;
+    gap: var(--gap);
+    padding: var(--gap);
+    align-items: flex-start;
+    min-height: calc(100vh - var(--hh));
+  }
+
+  .dash-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    flex: 1;
+    min-width: 0;
+    min-height: 80px;
+    transition: background .15s, outline .15s;
+    border-radius: var(--radius);
+  }
+  .dash-col.narrow { flex: 0 0 270px; }
+  .dash-col.wide   { flex: 1.6; }
+
+  body.editing .dash-col {
+    background: rgba(0,0,0,.018);
+    outline: 2px dashed #dedad3;
+    outline-offset: 4px;
+    padding: 6px;
+  }
+  body.editing .dash-col.col-over {
+    background: rgba(160,92,26,.04);
+    outline-color: var(--amber);
+  }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    min-height: 160px;
+    transition: border-color .15s, box-shadow .15s, opacity .15s;
+    animation: fadeUp .28s ease both;
+  }
+  .panel.dragging  { opacity: .3; }
+  .panel.panel-over {
+    border-color: var(--border-2);
+    box-shadow: 0 0 0 3px rgba(0,0,0,.05);
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(8px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .panel-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    user-select: none; flex-shrink: 0;
+    background: var(--surface);
+  }
+  .drag-grip {
+    color: var(--text-3); font-size: 14px;
+    cursor: grab; opacity: 0;
+    transition: opacity .15s; flex-shrink: 0;
+  }
+  body.editing .drag-grip           { opacity: .45; }
+  body.editing .panel:hover .drag-grip { opacity: 1; }
+  body.editing .panel-head          { cursor: grab; }
+
+  .panel-label {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .04em; text-transform: uppercase;
+    color: var(--text-2); flex: 1;
+  }
+
+  .chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; padding: 2px 7px; border-radius: 20px;
+  }
+  .chip-green { background: var(--green-bg); color: var(--green); }
+  .chip-amber { background: var(--amber-bg); color: var(--amber); }
+  .chip-red   { background: var(--red-bg);   color: var(--red);   }
+  .chip-blue  { background: var(--blue-bg);  color: var(--blue);  }
+  .chip-grey  { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
+
+  .panel-body {
+    flex: 1; overflow-y: auto; padding: 14px;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  }
+
+  /* ── AGENTS ── */
+  .agents-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .agent-card {
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 12px; background: var(--surface-2);
+    transition: border-color .15s, background .15s;
+    position: relative;
+  }
+  .agent-card:hover { background: var(--surface); border-color: var(--border-2); }
+  .agent-card::before {
+    content: ''; position: absolute;
+    left: 0; top: 18%; bottom: 18%; width: 3px;
+    border-radius: 0 2px 2px 0;
+  }
+  .agent-card.running::before { background: var(--green); }
+  .agent-card.idle::before    { background: var(--border-2); }
+  .agent-card.error::before   { background: var(--red); }
+  .agent-card.queued::before  { background: var(--amber); }
+
+  .agent-row  { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+  .agent-name { font-size: 12px; font-weight: 600; color: var(--text-1); flex: 1; }
+  .agent-status {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; font-weight: 500;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .agent-status.running { color: var(--green); }
+  .agent-status.idle    { color: var(--text-3); }
+  .agent-status.error   { color: var(--red); }
+  .agent-status.queued  { color: var(--amber); }
+  .status-pip { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .agent-status.running .status-pip { animation: blink 1.5s infinite; }
+
+  .agent-desc { font-size: 11px; color: var(--text-2); line-height: 1.4; margin-bottom: 8px; }
+  .agent-foot { display: flex; align-items: center; justify-content: space-between; }
+  .agent-last { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-3); }
+  .agent-btn {
+    font-size: 10px; font-weight: 500; padding: 3px 8px;
+    border-radius: 4px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-2);
+    cursor: pointer; transition: all .12s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .agent-btn:hover { border-color: var(--border-2); color: var(--text-1); }
+
+  /* ── SUMMARY ── */
+  .sum-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .sum-date    { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-3); }
+  .sum-updated { font-size: 11px; color: var(--text-3); }
+
+  .standup-row {
+    display: flex; gap: 10px;
+    padding: 9px 0; border-bottom: 1px solid var(--border);
+  }
+  .standup-row:last-of-type { border-bottom: none; }
+  .avatar {
+    width: 26px; height: 26px; border-radius: 5px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: var(--text-2); flex-shrink: 0;
+  }
+  .s-name { font-size: 12px; font-weight: 600; color: var(--text-1); margin-bottom: 1px; }
+  .s-note { font-size: 11px; color: var(--text-2); line-height: 1.5; }
+  .blocker {
+    display: inline-block; font-size: 9px; font-weight: 600;
+    padding: 1px 5px; background: var(--red-bg); color: var(--red);
+    border-radius: 3px; margin-left: 5px; vertical-align: middle;
+  }
+  .ai-digest {
+    margin-top: 12px; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px;
+  }
+  .ai-digest-lbl  { font-size: 10px; font-weight: 600; color: var(--text-3); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 4px; }
+  .ai-digest-text { font-size: 11px; color: var(--text-2); line-height: 1.65; }
+
+  /* ── PRIORITIES ── */
+  .shimmer {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,.04), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+
+  .priority-card {
+    display: flex; gap: 10px; padding: 10px 11px;
+    background: var(--surface-2); border: 1px solid transparent; border-radius: 6px;
+    transition: border-color .12s, background .12s;
+    animation: fadeUp .25s ease both;
+  }
+  .priority-card:hover { background: var(--surface); border-color: var(--border); }
+  .priority-rank {
+    font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+    color: var(--text-3); width: 14px; flex-shrink: 0; padding-top: 2px; text-align: right;
+  }
+  .priority-card:nth-child(1) .priority-rank { color: var(--red); }
+  .priority-card:nth-child(2) .priority-rank { color: var(--amber); }
+
+  .p-check {
+    width: 15px; height: 15px; border: 1.5px solid var(--border-2);
+    border-radius: 4px; flex-shrink: 0; margin-top: 2px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: transparent; transition: all .12s;
+  }
+  .p-check:hover { border-color: var(--green); }
+  .p-check.done  { background: var(--green); border-color: var(--green); color: #fff; }
+
+  .p-body  { flex: 1; min-width: 0; }
+  .p-title { font-size: 12px; font-weight: 500; color: var(--text-1); margin-bottom: 2px; line-height: 1.35; }
+  .p-title.done { text-decoration: line-through; color: var(--text-3); font-weight: 400; }
+  .p-why   { font-size: 11px; color: var(--text-2); line-height: 1.45; margin-bottom: 4px; }
+  .p-meta  { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .p-src   { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; }
+  .src-gmail    { color: #d93025; }
+  .src-asana    { color: #e8534a; }
+  .src-calendar { color: #1a73e8; }
+  .src-slack    { color: #3b82f6; }
+  .p-due   { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-3); }
+  .p-due.urgent { color: var(--red); }
+  .p-due.soon   { color: var(--amber); }
+
+  /* ── SETTINGS OVERLAY ── */
+  .settings-overlay {
+    position: fixed; inset: 0;
+    background: rgba(26,25,23,.45);
+    backdrop-filter: blur(3px);
+    z-index: 500;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  .settings-overlay.open { opacity: 1; pointer-events: all; }
+
+  .settings-drawer {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 480px; max-width: 95vw;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 501;
+    display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform .25s cubic-bezier(.4,0,.2,1);
+    overflow: hidden;
+  }
+  .settings-drawer.open { transform: translateX(0); }
+
+  .settings-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .settings-back {
+    width: 28px; height: 28px; border-radius: 5px;
+    border: 1px solid var(--border); background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 14px; color: var(--text-2);
+    transition: all .12s; flex-shrink: 0;
+  }
+  .settings-back:hover { background: var(--surface); border-color: var(--border-2); color: var(--text-1); }
+  .settings-title { font-size: 15px; font-weight: 600; color: var(--text-1); flex: 1; }
+  .settings-sub   { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+
+  /* Integration nav tabs */
+  .int-tabs {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  .need-conn-tab {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--blue);
+    text-decoration: none;
+    padding: 6px 4px;
+    white-space: nowrap;
+    transition: color .12s;
+  }
+  .need-conn-tab:hover { color: var(--text-1); text-decoration: underline; }
+
+  .int-tab {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 500; color: var(--text-2);
+    cursor: pointer; transition: all .12s; white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .int-tab:hover { background: var(--surface-2); color: var(--text-1); }
+  .int-tab.active { background: var(--surface-2); border-color: var(--border); color: var(--text-1); }
+  .int-tab-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Settings body */
+  .settings-body { flex: 1; overflow-y: auto; padding: 24px 20px; }
+
+  /* Integration detail pane */
+  .int-pane { display: none; }
+  .int-pane.active { display: block; }
+
+  .int-hero {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 24px;
+  }
+  .int-logo {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .int-hero-name { font-size: 17px; font-weight: 600; color: var(--text-1); margin-bottom: 2px; }
+  .int-hero-desc { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+
+  .int-status-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px;
+    border-radius: 7px; margin-bottom: 20px;
+    border: 1px solid;
+  }
+  .int-status-bar.connected {
+    background: var(--green-bg); border-color: rgba(45,122,79,.2);
+  }
+  .int-status-bar.disconnected {
+    background: var(--surface-2); border-color: var(--border);
+  }
+  .int-status-bar.error {
+    background: var(--red-bg); border-color: rgba(184,50,50,.2);
+  }
+  .int-status-icon { font-size: 16px; }
+  .int-status-text { flex: 1; }
+  .int-status-label {
+    font-size: 12px; font-weight: 600;
+    color: var(--text-1);
+  }
+  .int-status-detail { font-size: 11px; color: var(--text-2); margin-top: 1px; }
+
+  .connect-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 600;
+    padding: 7px 16px; border-radius: 6px;
+    cursor: pointer; transition: all .15s;
+    white-space: nowrap;
+  }
+  .connect-btn.do-connect {
+    background: var(--text-1); color: #fff; border: 1px solid var(--text-1);
+  }
+  .connect-btn.do-connect:hover { background: #333; }
+  .connect-btn.do-disconnect {
+    background: transparent; color: var(--red); border: 1px solid rgba(184,50,50,.3);
+  }
+  .connect-btn.do-disconnect:hover { background: var(--red-bg); }
+
+  /* Config fields */
+  .config-section { margin-bottom: 24px; }
+  .config-section-title {
+    font-size: 11px; font-weight: 600; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--text-3);
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .field-row { margin-bottom: 12px; }
+  .field-label {
+    font-size: 11px; font-weight: 500; color: var(--text-2);
+    margin-bottom: 5px; display: block;
+  }
+  .field-input {
+    width: 100%; padding: 8px 10px;
+    border: 1px solid var(--border); border-radius: 5px;
+    background: var(--surface-2); color: var(--text-1);
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    transition: border-color .12s, background .12s;
+    outline: none;
+  }
+  .field-input:focus { border-color: var(--border-2); background: var(--surface); }
+  .field-input::placeholder { color: var(--text-3); }
+  .field-hint { font-size: 10px; color: var(--text-3); margin-top: 4px; }
+
+  /* Toggle row */
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-info { flex: 1; }
+  .toggle-name { font-size: 12px; font-weight: 500; color: var(--text-1); margin-bottom: 1px; }
+  .toggle-desc { font-size: 11px; color: var(--text-2); }
+
+  .toggle {
+    width: 36px; height: 20px; border-radius: 10px;
+    background: var(--border-2); position: relative;
+    cursor: pointer; transition: background .2s; flex-shrink: 0;
+    border: none; outline: none;
+  }
+  .toggle::after {
+    content: ''; position: absolute;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #fff; top: 3px; left: 3px;
+    transition: transform .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+  .toggle.on { background: var(--green); }
+  .toggle.on::after { transform: translateX(16px); }
+
+  /* Scope tags */
+  .scope-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .scope-tag {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    padding: 3px 8px; border-radius: 4px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--text-2);
+  }
+
+
+  .save-row {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 8px; justify-content: flex-end;
+    flex-shrink: 0; background: var(--surface);
+  }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 18px; right: 18px;
+    background: var(--text-1); color: #fff;
+    font-size: 12px; font-weight: 500;
+    padding: 9px 16px; border-radius: 6px;
+    transform: translateY(50px); opacity: 0;
+    transition: all .2s; pointer-events: none; z-index: 999;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="h-brand">Dashboard</span>
+  <span class="h-date" id="h-date"></span>
+  <div class="h-div"></div>
+  <div class="h-pill" id="pill-n8n">   <div class="h-dot on"  id="dot-n8n"></div>    n8n</div>
+  <div class="h-pill" id="pill-slack"> <div class="h-dot on"  id="dot-slack"></div>  Slack</div>
+  <div class="h-pill" id="pill-asana"> <div class="h-dot on"  id="dot-asana"></div>  Asana</div>
+  <div class="h-pill" id="pill-google"><div class="h-dot off" id="dot-google"></div> Google</div>
+  <div class="h-right">
+    <span class="h-clock" id="clock"></span>
+    <div class="h-div"></div>
+    <button class="btn" id="edit-btn" onclick="toggleEdit()">Edit Layout</button>
+    <button class="btn" onclick="saveLayout()">Save</button>
+    <button class="btn" onclick="resetLayout()">Reset</button>
+  </div>
+</header>
+
+<div class="edit-banner">Drag panels into any column or reorder within a column — click Save to keep your layout</div>
+
+<div class="dash-cols" id="dash-cols">
+
+  <!-- LEFT: Summary + Priorities -->
+  <div class="dash-col wide" id="col-left">
+
+    <div class="panel" id="p-summary" draggable="false">
+      <div class="panel-head">
+        <span class="drag-grip">⠿</span>
+        <span class="panel-label">Daily Summary</span>
+        <span class="chip chip-grey">n8n · Slack</span>
+      </div>
+      <div class="panel-body">
+        <div class="sum-meta">
+          <span class="sum-date" id="s-date"></span>
+          <span class="sum-updated">Updated 7:08 AM</span>
+        </div>
+        <div class="standup-row">
+          <div class="avatar">AK</div>
+          <div><div class="s-name">Alex K.</div><div class="s-note">Finishing staging deploy — blocked on env vars.<span class="blocker">Blocker</span></div></div>
+        </div>
+        <div class="standup-row">
+          <div class="avatar">MT</div>
+          <div><div class="s-name">Morgan T.</div><div class="s-note">API integration on track, handing off today EOD.</div></div>
+        </div>
+        <div class="standup-row">
+          <div class="avatar">JL</div>
+          <div><div class="s-name">Jamie L.</div><div class="s-note">Design revisions done. Sending to review this afternoon.</div></div>
+        </div>
+        <div class="standup-row">
+          <div class="avatar">RP</div>
+          <div><div class="s-name">Riley P.</div><div class="s-note">Client call prepped, deck finalized.</div></div>
+        </div>
+        <div class="ai-digest">
+          <div class="ai-digest-lbl">AI Synthesis</div>
+          <div class="ai-digest-text">One active blocker (Alex) needs triage. Three team members on track. Two deliverables expected by EOD. No downstream dependencies flagged.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="p-tasks" draggable="false">
+      <div class="panel-head">
+        <span class="drag-grip">⠿</span>
+        <span class="panel-label">Top 5 Priorities</span>
+        <span class="chip chip-grey">Gmail · Calendar · Asana</span>
+        <span class="chip chip-grey" id="priority-ts" style="margin-left:auto"></span>
+        <button class="btn" id="refresh-btn" onclick="runPriorityAI()" style="margin-left:8px;font-size:11px;padding:3px 10px;">↻ Refresh</button>
+      </div>
+      <div class="panel-body" id="priority-body">
+
+        <div id="state-loading" style="display:none">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="height:62px;background:var(--surface-2);border-radius:6px;border:1px solid var(--border);overflow:hidden;position:relative"><div class="shimmer"></div></div>
+            <div style="height:62px;background:var(--surface-2);border-radius:6px;border:1px solid var(--border);overflow:hidden;position:relative"><div class="shimmer" style="animation-delay:.15s"></div></div>
+            <div style="height:62px;background:var(--surface-2);border-radius:6px;border:1px solid var(--border);overflow:hidden;position:relative"><div class="shimmer" style="animation-delay:.3s"></div></div>
+            <div style="height:62px;background:var(--surface-2);border-radius:6px;border:1px solid var(--border);overflow:hidden;position:relative"><div class="shimmer" style="animation-delay:.45s"></div></div>
+            <div style="height:62px;background:var(--surface-2);border-radius:6px;border:1px solid var(--border);overflow:hidden;position:relative"><div class="shimmer" style="animation-delay:.6s"></div></div>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-3);text-align:center;font-family:'DM Mono',monospace" id="loading-lbl">Reading emails, calendar, and tasks…</div>
+        </div>
+
+        <div id="state-error" style="display:none;padding:20px;text-align:center">
+          <div style="font-size:13px;color:var(--text-2);margin-bottom:6px">Couldn't load priorities</div>
+          <div style="font-size:11px;color:var(--text-3)" id="error-msg"></div>
+          <button class="btn" onclick="runPriorityAI()" style="margin-top:10px">Try again</button>
+        </div>
+
+        <div id="state-results" style="display:none">
+          <div style="font-size:11px;color:var(--text-3);margin-bottom:10px;font-family:'DM Mono',monospace;line-height:1.5" id="p-rationale"></div>
+          <div style="display:flex;flex-direction:column;gap:6px" id="p-list"></div>
+        </div>
+
+        <div id="state-empty" style="padding:28px 16px;text-align:center">
+          <div style="font-size:28px;margin-bottom:10px;opacity:.22">◎</div>
+          <div style="font-size:13px;font-weight:500;color:var(--text-2);margin-bottom:5px">AI-powered daily priorities</div>
+          <div style="font-size:12px;color:var(--text-3);line-height:1.6;margin-bottom:14px">Claude reads your unread emails, today's calendar, and assigned Asana tasks — then surfaces your real top 5 with reasoning.</div>
+          <button class="btn primary" onclick="runPriorityAI()">Generate priorities</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: Agents (narrow) -->
+  <div class="dash-col narrow" id="col-right">
+
+    <div class="panel" id="p-agents" draggable="false">
+      <div class="panel-head">
+        <span class="drag-grip">⠿</span>
+        <span class="panel-label">AI Agents</span>
+        <span class="chip chip-green">3 running</span>
+      </div>
+      <div class="panel-body">
+        <div class="agents-list">
+
+          <div class="agent-card running">
+            <div class="agent-row">
+              <div class="agent-name">Slack Digest</div>
+              <div class="agent-status running"><div class="status-pip"></div> Running</div>
+            </div>
+            <div class="agent-desc">Compiles daily standups from channel check-ins</div>
+            <div class="agent-foot">
+              <div class="agent-last">Today 7:02 AM</div>
+              <button class="agent-btn">Stop</button>
+            </div>
+          </div>
+
+          <div class="agent-card running">
+            <div class="agent-row">
+              <div class="agent-name">Task Triage</div>
+              <div class="agent-status running"><div class="status-pip"></div> Running</div>
+            </div>
+            <div class="agent-desc">Pulls Asana + Slack tasks, prioritizes by urgency</div>
+            <div class="agent-foot">
+              <div class="agent-last">Today 7:00 AM</div>
+              <button class="agent-btn">Stop</button>
+            </div>
+          </div>
+
+          <div class="agent-card running">
+            <div class="agent-row">
+              <div class="agent-name">Mail Classifier</div>
+              <div class="agent-status running"><div class="status-pip"></div> Running</div>
+            </div>
+            <div class="agent-desc">Flags priority Gmail threads for action</div>
+            <div class="agent-foot">
+              <div class="agent-last">Today 6:55 AM</div>
+              <button class="agent-btn">Stop</button>
+            </div>
+          </div>
+
+          <div class="agent-card queued">
+            <div class="agent-row">
+              <div class="agent-name">Calendar Prep</div>
+              <div class="agent-status queued"><div class="status-pip"></div> Queued</div>
+            </div>
+            <div class="agent-desc">Summarizes upcoming meetings and pulls context</div>
+            <div class="agent-foot">
+              <div class="agent-last">Yesterday 5:00 PM</div>
+              <button class="agent-btn">Run</button>
+            </div>
+          </div>
+
+          <div class="agent-card idle">
+            <div class="agent-row">
+              <div class="agent-name">Weekly Report</div>
+              <div class="agent-status idle"><div class="status-pip"></div> Idle</div>
+            </div>
+            <div class="agent-desc">End-of-week summary from all data sources</div>
+            <div class="agent-foot">
+              <div class="agent-last">Fri 4:30 PM</div>
+              <button class="agent-btn">Run</button>
+            </div>
+          </div>
+
+          <div class="agent-card idle">
+            <div class="agent-row">
+              <div class="agent-name">Team Pulse</div>
+              <div class="agent-status idle"><div class="status-pip"></div> Idle</div>
+            </div>
+            <div class="agent-desc">Monitors Slack sentiment, flags blockers</div>
+            <div class="agent-foot">
+              <div class="agent-last">Mon 8:00 AM</div>
+              <button class="agent-btn">Run</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- SETTINGS OVERLAY -->
+<div class="settings-overlay" id="settings-overlay"></div>
+
+<div class="settings-drawer" id="settings-drawer">
+  <div class="settings-header">
+    <div class="settings-back" onclick="closeSettings()">←</div>
+    <div>
+      <div class="settings-title">Integrations</div>
+      <div class="settings-sub">Manage connections to your tools</div>
+    </div>
+  </div>
+
+  <!-- Integration tabs -->
+  <div class="int-tabs">
+    <div class="int-tab active" id="tab-n8n"    onclick="switchTab('n8n')">   <div class="int-tab-dot" id="tdot-n8n"   ></div> n8n</div>
+    <div class="int-tab"        id="tab-slack"  onclick="switchTab('slack')"> <div class="int-tab-dot" id="tdot-slack" ></div> Slack</div>
+    <div class="int-tab"        id="tab-asana"  onclick="switchTab('asana')"> <div class="int-tab-dot" id="tdot-asana" ></div> Asana</div>
+    <div class="int-tab"        id="tab-google" onclick="switchTab('google')"><div class="int-tab-dot" id="tdot-google"></div> Google</div>
+    <a href="https://forms.gle/wG1ioZo3uNUCy7LaA" target="_blank" class="need-conn-tab">Need a connection? →</a>
+  </div>
+
+  <div class="settings-body">
+
+    <!-- n8n -->
+    <div class="int-pane active" id="pane-n8n">
+      <div class="int-hero">
+        <div class="int-logo" style="background:#f0faf5">⚡</div>
+        <div>
+          <div class="int-hero-name">n8n</div>
+          <div class="int-hero-desc">Workflow automation platform. Connects your AI agents to Slack, Asana, Gmail, and other tools.</div>
+        </div>
+      </div>
+      <div class="int-status-bar connected" id="status-n8n">
+        <div class="int-status-icon">✓</div>
+        <div class="int-status-text">
+          <div class="int-status-label">Connected</div>
+          <div class="int-status-detail" id="status-detail-n8n">Last sync: today 7:02 AM · 6 active workflows</div>
+        </div>
+        <button class="connect-btn do-disconnect" onclick="toggleConnection('n8n')">Disconnect</button>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Connection</div>
+        <div class="field-row">
+          <label class="field-label">n8n Instance URL</label>
+          <input class="field-input" id="n8n-url" type="text" value="http://localhost:5678" placeholder="https://your-n8n-instance.com">
+          <div class="field-hint">Your self-hosted or cloud n8n URL</div>
+        </div>
+        <div class="field-row">
+          <label class="field-label">API Key</label>
+          <input class="field-input" id="n8n-key" type="password" value="n8n_api_••••••••••••••••" placeholder="n8n_api_...">
+          <div class="field-hint">Found in n8n → Settings → API</div>
+        </div>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Permissions</div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Read workflows</div><div class="toggle-desc">View agent names, status, and last run times</div></div>
+          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Trigger workflows</div><div class="toggle-desc">Start or stop agents from the dashboard</div></div>
+          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Execution history</div><div class="toggle-desc">Show last run timestamps on agent cards</div></div>
+          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slack -->
+    <div class="int-pane" id="pane-slack">
+      <div class="int-hero">
+        <div class="int-logo" style="background:#f0f4ff">#</div>
+        <div>
+          <div class="int-hero-name">Slack</div>
+          <div class="int-hero-desc">Team messaging. Used to compile daily standup summaries via your AI Digest agent.</div>
+        </div>
+      </div>
+      <div class="int-status-bar connected" id="status-slack">
+        <div class="int-status-icon">✓</div>
+        <div class="int-status-text">
+          <div class="int-status-label">Connected</div>
+          <div class="int-status-detail" id="status-detail-slack">Workspace: Acme Corp · Authorized as <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="84fdebf1c4e5e7e9e1aae7ebe9">[email&#160;protected]</a></div>
+        </div>
+        <button class="connect-btn do-disconnect" onclick="toggleConnection('slack')">Disconnect</button>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">OAuth</div>
+        <div class="field-row">
+          <label class="field-label">Bot Token</label>
+          <input class="field-input" type="password" value="xoxb-••••••••••••••••" placeholder="xoxb-...">
+          <div class="field-hint">Slack App → OAuth & Permissions → Bot Token</div>
+        </div>
+        <div class="field-row">
+          <label class="field-label">Standup Channel</label>
+          <input class="field-input" type="text" value="#team-standup" placeholder="#channel-name">
+          <div class="field-hint">Channel your team posts daily check-ins to</div>
+        </div>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Permissions</div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Read channel messages</div><div class="toggle-desc">Pull standup messages for AI summarization</div></div>
+          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Read direct messages</div><div class="toggle-desc">Surface DMs flagged as action items</div></div>
+          <button class="toggle" onclick="this.classList.toggle('on')"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Post messages</div><div class="toggle-desc">Allow agents to send reminders to channels</div></div>
+          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+        </div>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">OAuth Scopes Granted</div>
+        <div class="scope-list">
+          <span class="scope-tag">channels:read</span>
+          <span class="scope-tag">channels:history</span>
+          <span class="scope-tag">chat:write</span>
+          <span class="scope-tag">users:read</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Asana -->
+    <div class="int-pane" id="pane-asana">
+      <div class="int-hero">
+        <div class="int-logo" style="background:#fff2f0">✦</div>
+        <div>
+          <div class="int-hero-name">Asana</div>
+          <div class="int-hero-desc">Project and task management. Provides your assigned tasks to the AI priority engine.</div>
+        </div>
+      </div>
+      <div class="int-status-bar connected" id="status-asana">
+        <div class="int-status-icon">✓</div>
+        <div class="int-status-text">
+          <div class="int-status-label">Connected</div>
+          <div class="int-status-detail" id="status-detail-asana">Workspace: Acme Corp · 12 tasks assigned to you</div>
+        </div>
+        <button class="connect-btn do-disconnect" onclick="toggleConnection('asana')">Disconnect</button>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Connection</div>
+        <div class="field-row">
+          <label class="field-label">Personal Access Token</label>
+          <input class="field-input" type="password" value="1/••••••••••••••••" placeholder="1/...">
+          <div class="field-hint">Asana → My Profile → Apps → Developer Apps</div>
+        </div>
+        <div class="field-row">
+          <label class="field-label">Workspace GID</label>
+          <input class="field-input" type="text" value="123456789" placeholder="Workspace ID">
+          <div class="field-hint">Found in your Asana workspace URL</div>
+        </div>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Data Scope</div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Tasks assigned to me</div><div class="toggle-desc">Feed personal tasks to the AI priority engine</div></div>
+          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Team tasks</div><div class="toggle-desc">Include tasks across your team for blocker detection</div></div>
+          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Mark tasks complete</div><div class="toggle-desc">Checking off a priority item updates it in Asana</div></div>
+          <button class="toggle" onclick="this.classList.toggle('on')"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Google -->
+    <div class="int-pane" id="pane-google">
+      <div class="int-hero">
+        <div class="int-logo" style="background:#f8f8f8">G</div>
+        <div>
+          <div class="int-hero-name">Google Workspace</div>
+          <div class="int-hero-desc">Gmail and Calendar. Provides email signals and meeting context to the AI priority engine.</div>
+        </div>
+      </div>
+      <div class="int-status-bar disconnected" id="status-google">
+        <div class="int-status-icon">○</div>
+        <div class="int-status-text">
+          <div class="int-status-label">Not connected</div>
+          <div class="int-status-detail" id="status-detail-google">Connect to enable email + calendar context in AI priorities</div>
+        </div>
+        <button class="connect-btn do-connect" onclick="toggleConnection('google')">Connect with Google</button>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">OAuth 2.0</div>
+        <div class="field-row">
+          <label class="field-label">Client ID</label>
+          <input class="field-input" type="text" placeholder="your-client-id.apps.googleusercontent.com">
+          <div class="field-hint">Google Cloud Console → Credentials → OAuth Client</div>
+        </div>
+        <div class="field-row">
+          <label class="field-label">Client Secret</label>
+          <input class="field-input" type="password" placeholder="GOCSPX-...">
+        </div>
+        <div class="field-row">
+          <label class="field-label">Redirect URI</label>
+          <input class="field-input" type="text" value="http://localhost:3000/oauth/callback" placeholder="https://...">
+        </div>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Permissions (once connected)</div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Gmail — read unread</div><div class="toggle-desc">Surface email context in AI priority ranking</div></div>
+          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Google Calendar — today's events</div><div class="toggle-desc">Pull meeting schedule into priority context</div></div>
+          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Gmail — send replies</div><div class="toggle-desc">Allow agents to draft and send email replies</div></div>
+          <button class="toggle" onclick="this.classList.toggle('on')"></button>
+        </div>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Required OAuth Scopes</div>
+        <div class="scope-list">
+          <span class="scope-tag">gmail.readonly</span>
+          <span class="scope-tag">calendar.readonly</span>
+          <span class="scope-tag">userinfo.email</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /settings-body -->
+
+  <div class="save-row">
+    <button class="btn" onclick="closeSettings()">Cancel</button>
+    <button class="btn primary" onclick="saveIntegration()">Save changes</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── CLOCK & DATE ─────────────────────────────────────────────
+const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MSHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function tick() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(tick,1000); tick();
+
+const now = new Date();
+document.getElementById('h-date').textContent = DAYS[now.getDay()]+', '+MONTHS[now.getMonth()]+' '+now.getDate();
+document.getElementById('s-date').textContent  = DAYS[now.getDay()].slice(0,3).toUpperCase()+' '+MSHORT[now.getMonth()].toUpperCase()+' '+now.getDate();
+
+// ── COLUMN DRAG & DROP ───────────────────────────────────────
+// Each .dash-col is a drop zone. Panels can be dragged across
+// columns or reordered within the same column. Hovering over
+// the top/bottom half of a panel inserts before/after it.
+
+let editing = false;
+let dragSrc = null;
+
+function toggleEdit() {
+  editing = !editing;
+  document.body.classList.toggle('editing', editing);
+  const btn = document.getElementById('edit-btn');
+  btn.classList.toggle('active', editing);
+  btn.textContent = editing ? 'Done' : 'Edit Layout';
+  document.querySelectorAll('.panel').forEach(p => p.draggable = editing);
+}
+
+document.addEventListener('dragstart', e => {
+  const p = e.target.closest('.panel');
+  if (!p || !editing) return;
+  dragSrc = p;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', p.id);
+  setTimeout(() => p.classList.add('dragging'), 0);
+});
+
+document.addEventListener('dragend', () => {
+  if (dragSrc) dragSrc.classList.remove('dragging');
+  document.querySelectorAll('.panel-over').forEach(el => el.classList.remove('panel-over'));
+  document.querySelectorAll('.col-over').forEach(el => el.classList.remove('col-over'));
+  dragSrc = null;
+});
+
+document.querySelectorAll('.dash-col').forEach(col => {
+
+  col.addEventListener('dragover', e => {
+    if (!dragSrc) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+
+    const hoverPanel = e.target.closest('.panel');
+    document.querySelectorAll('.panel-over').forEach(el => el.classList.remove('panel-over'));
+    document.querySelectorAll('.col-over').forEach(el => el.classList.remove('col-over'));
+
+    if (hoverPanel && hoverPanel !== dragSrc) {
+      hoverPanel.classList.add('panel-over');
+    } else {
+      col.classList.add('col-over');
+    }
+  });
+
+  col.addEventListener('dragleave', e => {
+    if (!col.contains(e.relatedTarget)) {
+      col.classList.remove('col-over');
+    }
+  });
+
+  col.addEventListener('drop', e => {
+    e.preventDefault();
+    if (!dragSrc) return;
+
+    document.querySelectorAll('.panel-over').forEach(el => el.classList.remove('panel-over'));
+    document.querySelectorAll('.col-over').forEach(el => el.classList.remove('col-over'));
+
+    const hoverPanel = e.target.closest('.panel');
+
+    if (hoverPanel && hoverPanel !== dragSrc) {
+      const rect = hoverPanel.getBoundingClientRect();
+      if (e.clientY < rect.top + rect.height / 2) {
+        col.insertBefore(dragSrc, hoverPanel);
+      } else {
+        col.insertBefore(dragSrc, hoverPanel.nextSibling);
+      }
+    } else {
+      col.appendChild(dragSrc);
+    }
+
+    toast('Panel moved — save to keep');
+  });
+});
+
+// ── SAVE / RESTORE LAYOUT ────────────────────────────────────
+function saveLayout() {
+  const layout = [...document.querySelectorAll('.dash-col')].map(col => ({
+    id: col.id,
+    panels: [...col.querySelectorAll('.panel')].map(p => p.id)
+  }));
+  localStorage.setItem('cmd-dash-v2', JSON.stringify(layout));
+  toast('Layout saved');
+}
+
+function resetLayout() {
+  localStorage.removeItem('cmd-dash-v2');
+  location.reload();
+}
+
+(function restoreLayout() {
+  const saved = localStorage.getItem('cmd-dash-v2');
+  if (!saved) return;
+  try {
+    JSON.parse(saved).forEach(({ id, panels }) => {
+      const col = document.getElementById(id);
+      if (!col) return;
+      panels.forEach(pid => {
+        const el = document.getElementById(pid);
+        if (el) col.appendChild(el);
+      });
+    });
+  } catch(_) {}
+})();
+
+// ── AGENT BUTTONS ────────────────────────────────────────────
+document.querySelectorAll('.agent-btn').forEach(btn => {
+  btn.addEventListener('click', e => {
+    const card    = e.target.closest('.agent-card');
+    const st      = card.querySelector('.agent-status');
+    const name    = card.querySelector('.agent-name').textContent;
+    const running = card.classList.contains('running');
+    ['running','idle','queued','error'].forEach(c => card.classList.remove(c));
+    if (running) {
+      card.classList.add('idle');
+      st.className = 'agent-status idle';
+      st.innerHTML = '<div class="status-pip"></div> Idle';
+      btn.textContent = 'Run';
+      toast(name + ' stopped');
+    } else {
+      card.classList.add('running');
+      st.className = 'agent-status running';
+      st.innerHTML = '<div class="status-pip"></div> Running';
+      btn.textContent = 'Stop';
+      toast(name + ' started');
+    }
+  });
+});
+
+// ── AI PRIORITY ENGINE ───────────────────────────────────────
+const MOCK = {
+  emails: [
+    { from:"Alex K.",      subject:"Staging deploy still failing — need help",  preview:"Still getting the same env error. Blocking my whole sprint ticket.", unread:true  },
+    { from:"Client Riley", subject:"Re: Review meeting agenda",                  preview:"Confirmed for 2pm. Can we add 10 min for Q&A? Bring the updated roadmap.", unread:true  },
+    { from:"Morgan T.",    subject:"API integration — scope question",           preview:"Before I hand off today — is the auth layer in scope for this sprint?", unread:false },
+  ],
+  calendar: [
+    { title:"Team Standup",    time:"9:00–9:30 AM"   },
+    { title:"Sprint Planning", time:"11:00 AM–12:00 PM" },
+    { title:"Client Review",   time:"2:00–3:00 PM",   notes:"External. Client asked for updated roadmap." },
+    { title:"1:1 with Riley",  time:"4:30–5:00 PM"   },
+  ],
+  asana: [
+    { title:"Resolve staging deploy blocker — Alex's env var issue",   due:"Mar 14 (overdue)", priority:"High"   },
+    { title:"Finalize Q1 project retrospective doc",                   due:"Today EOD",        priority:"High"   },
+    { title:"Review Jamie's design revisions and leave comments",      due:"Today EOD",        priority:"Medium" },
+    { title:"Post sprint planning reminder to team channel",           due:"Today",            priority:"Low"    },
+    { title:"Draft team goals for Q2 kickoff",                         due:"Wed Mar 18",       priority:"Medium" },
+    { title:"Update project status in Asana for stakeholder view",     due:"Fri Mar 20",       priority:"Low"    },
+  ]
+};
+
+const LOADING_STEPS = [
+  "Reading unread emails…",
+  "Scanning today's calendar…",
+  "Loading Asana tasks…",
+  "Weighing urgency and context…",
+  "Ranking your top 5…"
+];
+
+function showState(id) {
+  ['state-loading','state-error','state-results','state-empty'].forEach(s =>
+    document.getElementById(s).style.display = s === id ? 'block' : 'none'
+  );
+}
+
+async function runPriorityAI() {
+  showState('state-loading');
+  const btn = document.getElementById('refresh-btn');
+  btn.disabled = true; btn.textContent = '…';
+
+  const lbl = document.getElementById('loading-lbl');
+  let step = 0;
+  const timer = setInterval(() => {
+    if (step < LOADING_STEPS.length) lbl.textContent = LOADING_STEPS[step++];
+  }, 700);
+
+  const today = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+
+  const prompt = `You are an executive assistant AI. Based on the data below, identify and rank the top 5 most important tasks or actions for the user to focus on TODAY (${today}).
+
+Consider: overdue items, unread emails needing response, upcoming meetings requiring prep, blocked teammates, and cross-source signals (e.g. a client email + a meeting with that client = higher combined priority).
+
+UNREAD EMAILS:
+${MOCK.emails.map(e=>`- From: ${e.from} | Subject: "${e.subject}" | Preview: "${e.preview}" | Unread: ${e.unread}`).join('\n')}
+
+TODAY'S CALENDAR:
+${MOCK.calendar.map(e=>`- ${e.title} at ${e.time}${e.notes?' | Note: '+e.notes:''}`).join('\n')}
+
+ASANA TASKS ASSIGNED TO ME:
+${MOCK.asana.map(t=>`- "${t.title}" | Due: ${t.due} | Priority: ${t.priority}`).join('\n')}
+
+Respond ONLY with a valid JSON object — no markdown fences, no text outside the JSON:
+{
+  "rationale": "One sentence explaining the prioritization logic.",
+  "tasks": [
+    {
+      "rank": 1,
+      "title": "Short, action-oriented task title",
+      "why": "One sentence referencing specific signals from the data above.",
+      "source": "gmail|asana|calendar",
+      "due": "Time or date string",
+      "urgency": "urgent|soon|normal"
+    }
+  ]
+}`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role:"user", content: prompt }]
+      })
+    });
+
+    clearInterval(timer);
+    if (!res.ok) throw new Error(`API ${res.status}`);
+
+    const data   = await res.json();
+    const raw    = data.content.map(b=>b.text||'').join('');
+    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+
+    renderPriorities(parsed);
+    document.getElementById('priority-ts').textContent =
+      'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+  } catch(err) {
+    clearInterval(timer);
+    showState('state-error');
+    document.getElementById('error-msg').textContent = err.message || 'Something went wrong.';
+  }
+
+  btn.disabled = false; btn.textContent = '↻ Refresh';
+}
+
+function renderPriorities(data) {
+  document.getElementById('p-rationale').textContent = data.rationale || '';
+  const list = document.getElementById('p-list');
+  list.innerHTML = '';
+
+  const srcMap   = { gmail:'Gmail', asana:'Asana', calendar:'Calendar', slack:'Slack' };
+  const classMap = { gmail:'src-gmail', asana:'src-asana', calendar:'src-calendar', slack:'src-slack' };
+
+  (data.tasks||[]).slice(0,5).forEach((t,i) => {
+    const dc = t.urgency==='urgent'?'urgent':t.urgency==='soon'?'soon':'';
+    const card = document.createElement('div');
+    card.className = 'priority-card';
+    card.style.animationDelay = (i*.07)+'s';
+    card.innerHTML = `
+      <div class="priority-rank">${t.rank}</div>
+      <div class="p-check" onclick="checkPriority(this)"></div>
+      <div class="p-body">
+        <div class="p-title">${t.title}</div>
+        <div class="p-why">${t.why}</div>
+        <div class="p-meta">
+          <span class="p-src ${classMap[t.source]||'src-asana'}">${srcMap[t.source]||t.source}</span>
+          ${t.due?`<span class="p-due ${dc}">${t.due}</span>`:''}
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  showState('state-results');
+}
+
+function checkPriority(el) {
+  el.classList.toggle('done');
+  el.textContent = el.classList.contains('done') ? '✓' : '';
+  el.closest('.priority-card').querySelector('.p-title').classList.toggle('done');
+}
+
+
+// ── INTEGRATION SETTINGS ─────────────────────────────────────
+
+// Connection state — persisted to localStorage
+const CONNECTIONS = JSON.parse(localStorage.getItem('connections') || JSON.stringify({
+  n8n:    { connected: true  },
+  slack:  { connected: true  },
+  asana:  { connected: true  },
+  google: { connected: false }
+}));
+
+const INT_COLORS = {
+  n8n:    'var(--green)',
+  slack:  'var(--blue)',
+  asana:  '#e8534a',
+  google: 'var(--border-2)'
+};
+
+let activeTab = 'n8n';
+
+function syncHeaderDots() {
+  Object.keys(CONNECTIONS).forEach(key => {
+    const dot = document.getElementById('dot-' + key);
+    if (!dot) return;
+    if (CONNECTIONS[key].connected) {
+      dot.className = 'h-dot on';
+    } else {
+      dot.className = 'h-dot off';
+    }
+  });
+}
+syncHeaderDots();
+
+function syncTabDots() {
+  Object.keys(CONNECTIONS).forEach(key => {
+    const tdot = document.getElementById('tdot-' + key);
+    if (!tdot) return;
+    tdot.style.background = CONNECTIONS[key].connected ? 'var(--green)' : 'var(--border-2)';
+  });
+}
+
+function openSettings(tab) {
+  document.getElementById('settings-overlay').classList.add('open');
+  document.getElementById('settings-drawer').classList.add('open');
+  switchTab(tab || activeTab);
+  syncTabDots();
+}
+
+function closeSettings(e) {
+  document.getElementById('settings-overlay').classList.remove('open');
+  document.getElementById('settings-drawer').classList.remove('open');
+}
+
+function switchTab(key) {
+  activeTab = key;
+  document.querySelectorAll('.int-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.int-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + key).classList.add('active');
+  document.getElementById('pane-' + key).classList.add('active');
+}
+
+function toggleConnection(key) {
+  const was = CONNECTIONS[key].connected;
+  CONNECTIONS[key].connected = !was;
+  localStorage.setItem('connections', JSON.stringify(CONNECTIONS));
+
+  const bar = document.getElementById('status-' + key);
+  const detail = document.getElementById('status-detail-' + key);
+  const connectBtn = bar.querySelector('.connect-btn');
+
+  if (CONNECTIONS[key].connected) {
+    bar.className = 'int-status-bar connected';
+    bar.querySelector('.int-status-icon').textContent = '✓';
+    bar.querySelector('.int-status-label').textContent = 'Connected';
+    if (detail) detail.textContent = 'Connected just now';
+    connectBtn.className = 'connect-btn do-disconnect';
+    connectBtn.textContent = 'Disconnect';
+    toast(key.charAt(0).toUpperCase() + key.slice(1) + ' connected');
+  } else {
+    bar.className = 'int-status-bar disconnected';
+    bar.querySelector('.int-status-icon').textContent = '○';
+    bar.querySelector('.int-status-label').textContent = 'Not connected';
+    if (detail) detail.textContent = 'Connect to enable this integration';
+    connectBtn.className = 'connect-btn do-connect';
+    connectBtn.textContent = key === 'google' ? 'Connect with Google' : 'Connect';
+    toast(key.charAt(0).toUpperCase() + key.slice(1) + ' disconnected');
+  }
+
+  syncHeaderDots();
+  syncTabDots();
+}
+
+function saveIntegration() {
+  localStorage.setItem('connections', JSON.stringify(CONNECTIONS));
+  toast('Integration settings saved');
+  closeSettings();
+}
+
+// Close on Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSettings();
+});
+
+// ── PILL & OVERLAY LISTENERS ──────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  ['n8n','slack','asana','google'].forEach(key => {
+    const pill = document.getElementById('pill-' + key);
+    if (pill) pill.addEventListener('click', () => openSettings(key));
+  });
+  document.getElementById('settings-overlay').addEventListener('click', () => closeSettings());
+});
+
+// ── TOAST ─────────────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+</script>
+</body>
+</html>
