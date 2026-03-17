@@ -1461,7 +1461,7 @@ async function connectAsana(settings) {
 
   const { verifier, challenge } = createPkcePair()
   const state = randomString(16)
-  const scopes = ['openid', 'email', 'profile', 'users:read', 'workspaces:read', 'tasks:read']
+  const scopes = ['users:read', 'workspaces:read', 'tasks:read']
   if (current.permissions.markTasksComplete) scopes.push('tasks:write')
 
   const authorizeUrl = new URL('https://app.asana.com/-/oauth_authorize')
