@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slack OAuth Bridge</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f5f4f1;
+      color: #1a1917;
+    }
+    main {
+      width: min(460px, calc(100vw - 40px));
+      padding: 28px 32px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid #e8e6e1;
+      box-shadow: 0 18px 40px rgba(26, 25, 23, 0.08);
+    }
+    h1 { margin: 0 0 10px; font-size: 20px; }
+    p { margin: 0; color: #6b6760; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Returning to Dashboard…</h1>
+    <p id="copy">Sending the Slack authorization result back to the desktop app.</p>
+  </main>
+  <script>
+    const relay = new URL('http://127.0.0.1:3456/oauth/slack/relay')
+    const params = new URLSearchParams(window.location.search)
+    relay.search = params.toString()
+    document.getElementById('copy').textContent = 'If the desktop app does not open the request automatically, keep this tab open and make sure Dashboard is running.'
+    window.location.replace(relay.toString())
+  </script>
+</body>
+</html>

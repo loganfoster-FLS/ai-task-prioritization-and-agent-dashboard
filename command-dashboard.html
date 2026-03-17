@@ -24,9 +24,50 @@
     --red-bg:    #fcecec;
     --blue:      #1e5fa6;
     --blue-bg:   #eaf1fc;
+    --accent:    #4c7d91;
+    --accent-soft:#dbeaf1;
+    --accent-glow:rgba(76,125,145,.22);
     --radius:    8px;
     --gap:       12px;
     --hh:        54px;
+  }
+
+  body[data-mode="light"] {
+    --bg:        #f5f4f1;
+    --surface:   #ffffff;
+    --surface-2: #f9f8f6;
+    --border:    #e8e6e1;
+    --border-2:  #d4d0c8;
+    --text-1:    #1a1917;
+    --text-2:    #6b6760;
+    --text-3:    #a8a49c;
+    --green:     #2d7a4f;
+    --green-bg:  #edf6f1;
+    --amber:     #a05c1a;
+    --amber-bg:  #fdf3e7;
+    --red:       #b83232;
+    --red-bg:    #fcecec;
+    --blue:      #1e5fa6;
+    --blue-bg:   #eaf1fc;
+  }
+
+  body[data-mode="dark"] {
+    --bg:        radial-gradient(circle at top, #1d3358 0%, #0a1220 52%, #05070c 100%);
+    --surface:   rgba(9,18,31,.88);
+    --surface-2: rgba(14,28,45,.92);
+    --border:    rgba(113,174,255,.22);
+    --border-2:  rgba(103,176,255,.48);
+    --text-1:    #d8ecff;
+    --text-2:    #92bfdc;
+    --text-3:    #6184a1;
+    --green:     #30d6b5;
+    --green-bg:  rgba(26,78,89,.55);
+    --amber:     #f0b04d;
+    --amber-bg:  rgba(104,71,21,.5);
+    --red:       #ff7373;
+    --red-bg:    rgba(111,30,39,.52);
+    --blue:      #67b8ff;
+    --blue-bg:   rgba(24,66,107,.55);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,6 +79,60 @@
     min-height: 100vh;
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
+    position: relative;
+    transition: background .35s ease, color .2s ease;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity .35s ease;
+  }
+
+  body[data-mode="light"]::before {
+    opacity: 1;
+    background:
+      radial-gradient(circle at 18% 16%, rgba(255,255,255,.82), transparent 28%),
+      radial-gradient(circle at 78% 10%, var(--accent-glow), transparent 24%),
+      linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0));
+  }
+
+  body[data-mode="dark"]::before {
+    opacity: 1;
+    background:
+      radial-gradient(circle at 20% 20%, var(--accent-glow), transparent 22%),
+      radial-gradient(circle at 82% 12%, rgba(255,255,255,.08), transparent 18%),
+      radial-gradient(circle at 70% 70%, rgba(41,102,160,.2), transparent 24%);
+  }
+
+  body[data-accent="wind"]   { --accent: #4f8fbf; --accent-soft: rgba(207,236,255,.78); --accent-glow: rgba(79,143,191,.26); }
+  body[data-accent="sands"]  { --accent: #be9352; --accent-soft: rgba(245,232,201,.82); --accent-glow: rgba(190,147,82,.24); }
+  body[data-accent="ember"]  { --accent: #c86464; --accent-soft: rgba(247,220,220,.82); --accent-glow: rgba(200,100,100,.24); }
+  body[data-accent="nature"] { --accent: #5c8a63; --accent-soft: rgba(217,235,217,.84); --accent-glow: rgba(92,138,99,.24); }
+  body[data-accent="sunset"] { --accent: #c9774e; --accent-soft: rgba(248,224,211,.82); --accent-glow: rgba(201,119,78,.24); }
+  body[data-accent="iris"]   { --accent: #7869c7; --accent-soft: rgba(226,221,247,.82); --accent-glow: rgba(120,105,199,.24); }
+
+  body[data-mode="dark"][data-accent="wind"]   { --accent-soft: rgba(28,61,90,.58); --accent-glow: rgba(103,176,255,.28); }
+  body[data-mode="dark"][data-accent="sands"]  { --accent-soft: rgba(88,65,31,.58); --accent-glow: rgba(240,176,77,.24); }
+  body[data-mode="dark"][data-accent="ember"]  { --accent-soft: rgba(92,41,48,.58); --accent-glow: rgba(255,115,115,.24); }
+  body[data-mode="dark"][data-accent="nature"] { --accent-soft: rgba(24,77,66,.58); --accent-glow: rgba(48,214,181,.24); }
+  body[data-mode="dark"][data-accent="sunset"] { --accent-soft: rgba(91,53,27,.58); --accent-glow: rgba(255,160,100,.24); }
+  body[data-mode="dark"][data-accent="iris"]   { --accent-soft: rgba(55,44,101,.58); --accent-glow: rgba(164,150,255,.24); }
+
+  body[data-mode="light"] .panel,
+  body[data-mode="light"] header,
+  body[data-mode="light"] .settings-drawer {
+    backdrop-filter: blur(8px);
+  }
+
+  body[data-mode="dark"] .panel,
+  body[data-mode="dark"] header,
+  body[data-mode="dark"] .settings-drawer {
+    backdrop-filter: blur(12px);
   }
 
   /* ── HEADER ── */
@@ -63,13 +158,26 @@
     transition: background .12s, color .12s;
     border: 1px solid transparent;
   }
-  .h-pill:hover { background: var(--surface-2); border-color: var(--border); color: var(--text-1); }
+  .h-pill:hover { background: var(--accent-soft); border-color: var(--border); color: var(--text-1); }
   .h-dot    { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   .h-dot.on { background: var(--green); animation: blink 2s infinite; }
   .h-dot.off{ background: var(--border-2); }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.35} }
   .h-right  { margin-left: auto; display: flex; align-items: center; gap: 10px; }
   .h-clock  { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-3); }
+  .theme-select {
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-2);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 0 10px;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+  }
+  .theme-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
 
   .btn {
     font-family: 'DM Sans', sans-serif;
@@ -83,9 +191,9 @@
     transition: all .15s;
   }
   .btn:hover   { background: var(--surface-2); border-color: var(--border-2); color: var(--text-1); }
-  .btn.primary { background: var(--text-1); color: #fff; border-color: var(--text-1); }
-  .btn.primary:hover { background: #333; }
-  .btn.active  { background: var(--text-1); color: #fff; border-color: var(--text-1); }
+  .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.primary:hover { filter: brightness(.95); }
+  .btn.active  { background: var(--accent); color: #fff; border-color: var(--accent); }
 
   /* ── EDIT BANNER ── */
   .edit-banner {
@@ -143,8 +251,8 @@
   }
   .panel.dragging  { opacity: .3; }
   .panel.panel-over {
-    border-color: var(--border-2);
-    box-shadow: 0 0 0 3px rgba(0,0,0,.05);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
   }
   @keyframes fadeUp {
     from { opacity:0; transform:translateY(8px); }
@@ -180,7 +288,7 @@
   .chip-green { background: var(--green-bg); color: var(--green); }
   .chip-amber { background: var(--amber-bg); color: var(--amber); }
   .chip-red   { background: var(--red-bg);   color: var(--red);   }
-  .chip-blue  { background: var(--blue-bg);  color: var(--blue);  }
+  .chip-blue  { background: var(--accent-soft); color: var(--accent); }
   .chip-grey  { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
 
   .panel-body {
@@ -266,8 +374,56 @@
   }
   .ai-digest-lbl  { font-size: 10px; font-weight: 600; color: var(--text-3); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 4px; }
   .ai-digest-text { font-size: 11px; color: var(--text-2); line-height: 1.65; }
+  .summary-list { display: flex; flex-direction: column; gap: 8px; }
+  .summary-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 11px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface-2);
+  }
+  .summary-mark {
+    width: 10px; height: 10px; border-radius: 50%;
+    margin-top: 3px; flex-shrink: 0;
+    background: var(--border-2);
+  }
+  .summary-mark.connected { background: var(--green); }
+  .summary-mark.configured { background: var(--amber); }
+  .summary-title { font-size: 12px; font-weight: 600; color: var(--text-1); margin-bottom: 2px; }
+  .summary-copy { font-size: 11px; color: var(--text-2); line-height: 1.5; }
+  .summary-copy.mono { font-family: 'DM Mono', monospace; font-size: 10px; }
+  .empty-note {
+    padding: 14px;
+    border: 1px dashed var(--border-2);
+    border-radius: 6px;
+    background: var(--surface-2);
+    font-size: 11px;
+    color: var(--text-2);
+    line-height: 1.6;
+  }
 
   /* ── PRIORITIES ── */
+  .priority-composer {
+    margin-bottom: 14px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--surface-2);
+  }
+  .priority-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 7px;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+  }
+  textarea.field-input {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.55;
+  }
   .shimmer {
     position: absolute; inset: 0;
     background: linear-gradient(90deg, transparent, rgba(0,0,0,.04), transparent);
@@ -282,7 +438,7 @@
     transition: border-color .12s, background .12s;
     animation: fadeUp .25s ease both;
   }
-  .priority-card:hover { background: var(--surface); border-color: var(--border); }
+  .priority-card:hover { background: var(--surface); border-color: var(--accent); }
   .priority-rank {
     font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
     color: var(--text-3); width: 14px; flex-shrink: 0; padding-top: 2px; text-align: right;
@@ -296,8 +452,8 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 9px; color: transparent; transition: all .12s;
   }
-  .p-check:hover { border-color: var(--green); }
-  .p-check.done  { background: var(--green); border-color: var(--green); color: #fff; }
+  .p-check:hover { border-color: var(--accent); }
+  .p-check.done  { background: var(--accent); border-color: var(--accent); color: #fff; }
 
   .p-body  { flex: 1; min-width: 0; }
   .p-title { font-size: 12px; font-weight: 500; color: var(--text-1); margin-bottom: 2px; line-height: 1.35; }
@@ -430,6 +586,7 @@
     color: var(--text-1);
   }
   .int-status-detail { font-size: 11px; color: var(--text-2); margin-top: 1px; }
+  .status-actions { display: flex; align-items: center; gap: 8px; }
 
   .connect-btn {
     font-family: 'DM Sans', sans-serif;
@@ -472,6 +629,50 @@
   .field-input:focus { border-color: var(--border-2); background: var(--surface); }
   .field-input::placeholder { color: var(--text-3); }
   .field-hint { font-size: 10px; color: var(--text-3); margin-top: 4px; }
+  .response-preview {
+    font-size: 11px;
+    color: var(--text-2);
+    line-height: 1.6;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    white-space: pre-wrap;
+  }
+  .config-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .preview-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .preview-item {
+    padding: 10px 11px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+  .preview-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-1);
+    margin-bottom: 3px;
+  }
+  .preview-meta {
+    font-size: 10px;
+    color: var(--text-3);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 4px;
+  }
+  .preview-copy {
+    font-size: 11px;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
 
   /* Toggle row */
   .toggle-row {
@@ -538,13 +739,26 @@
   <span class="h-brand">Dashboard</span>
   <span class="h-date" id="h-date"></span>
   <div class="h-div"></div>
-  <div class="h-pill" id="pill-n8n">   <div class="h-dot on"  id="dot-n8n"></div>    n8n</div>
-  <div class="h-pill" id="pill-slack"> <div class="h-dot on"  id="dot-slack"></div>  Slack</div>
-  <div class="h-pill" id="pill-asana"> <div class="h-dot on"  id="dot-asana"></div>  Asana</div>
+  <div class="h-pill" id="pill-openai"><div class="h-dot off" id="dot-openai"></div> AI</div>
+  <div class="h-pill" id="pill-n8n"><div class="h-dot off" id="dot-n8n"></div> n8n</div>
+  <div class="h-pill" id="pill-slack"><div class="h-dot off" id="dot-slack"></div> Slack</div>
+  <div class="h-pill" id="pill-asana"><div class="h-dot off" id="dot-asana"></div> Asana</div>
   <div class="h-pill" id="pill-google"><div class="h-dot off" id="dot-google"></div> Google</div>
   <div class="h-right">
     <span class="h-clock" id="clock"></span>
     <div class="h-div"></div>
+    <select class="theme-select" id="theme-mode-select" onchange="setThemeMode(this.value)" aria-label="Palette">
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+    <select class="theme-select" id="theme-accent-select" onchange="setThemeAccent(this.value)" aria-label="Accent">
+      <option value="wind">Wind</option>
+      <option value="sands">Sands</option>
+      <option value="ember">Ember</option>
+      <option value="nature">Nature</option>
+      <option value="sunset">Sunset</option>
+      <option value="iris">Iris</option>
+    </select>
     <button class="btn" id="edit-btn" onclick="toggleEdit()">Edit Layout</button>
     <button class="btn" onclick="saveLayout()">Save</button>
     <button class="btn" onclick="resetLayout()">Reset</button>
@@ -554,40 +768,22 @@
 <div class="edit-banner">Drag panels into any column or reorder within a column — click Save to keep your layout</div>
 
 <div class="dash-cols" id="dash-cols">
-
-  <!-- LEFT: Summary + Priorities -->
   <div class="dash-col wide" id="col-left">
-
     <div class="panel" id="p-summary" draggable="false">
       <div class="panel-head">
         <span class="drag-grip">⠿</span>
-        <span class="panel-label">Daily Summary</span>
-        <span class="chip chip-grey">n8n · Slack</span>
+        <span class="panel-label">Workspace Summary</span>
+        <span class="chip chip-grey">Live connection state</span>
       </div>
       <div class="panel-body">
         <div class="sum-meta">
           <span class="sum-date" id="s-date"></span>
-          <span class="sum-updated">Updated 7:08 AM</span>
+          <span class="sum-updated" id="summary-updated">Checking saved integrations…</span>
         </div>
-        <div class="standup-row">
-          <div class="avatar">AK</div>
-          <div><div class="s-name">Alex K.</div><div class="s-note">Finishing staging deploy — blocked on env vars.<span class="blocker">Blocker</span></div></div>
-        </div>
-        <div class="standup-row">
-          <div class="avatar">MT</div>
-          <div><div class="s-name">Morgan T.</div><div class="s-note">API integration on track, handing off today EOD.</div></div>
-        </div>
-        <div class="standup-row">
-          <div class="avatar">JL</div>
-          <div><div class="s-name">Jamie L.</div><div class="s-note">Design revisions done. Sending to review this afternoon.</div></div>
-        </div>
-        <div class="standup-row">
-          <div class="avatar">RP</div>
-          <div><div class="s-name">Riley P.</div><div class="s-note">Client call prepped, deck finalized.</div></div>
-        </div>
+        <div class="summary-list" id="summary-list"></div>
         <div class="ai-digest">
-          <div class="ai-digest-lbl">AI Synthesis</div>
-          <div class="ai-digest-text">One active blocker (Alex) needs triage. Three team members on track. Two deliverables expected by EOD. No downstream dependencies flagged.</div>
+          <div class="ai-digest-lbl">Assistant Status</div>
+          <div class="ai-digest-text" id="summary-digest-text">Connect OpenAI or Ollama to turn this shell into a working assistant.</div>
         </div>
       </div>
     </div>
@@ -596,11 +792,18 @@
       <div class="panel-head">
         <span class="drag-grip">⠿</span>
         <span class="panel-label">Top 5 Priorities</span>
-        <span class="chip chip-grey">Gmail · Calendar · Asana</span>
+        <span class="chip chip-grey">AI</span>
         <span class="chip chip-grey" id="priority-ts" style="margin-left:auto"></span>
-        <button class="btn" id="refresh-btn" onclick="runPriorityAI()" style="margin-left:8px;font-size:11px;padding:3px 10px;">↻ Refresh</button>
+        <button class="btn" id="refresh-btn" onclick="runPriorityAI()" style="margin-left:8px;font-size:11px;padding:3px 10px;">Generate</button>
       </div>
       <div class="panel-body" id="priority-body">
+        <div class="priority-composer">
+          <label class="priority-label" for="priority-context">Today's context</label>
+          <textarea class="field-input" id="priority-context" placeholder="Paste today's emails, meetings, blockers, tasks, or notes here. The dashboard will rank the highest-value actions for today."></textarea>
+          <div class="field-hint" id="priority-helper">Save your OpenAI or Ollama details in Integrations, then paste your real work context here.</div>
+        </div>
+
+        <div id="admin-priority-list" style="margin-bottom:14px"></div>
 
         <div id="state-loading" style="display:none">
           <div style="display:flex;flex-direction:column;gap:8px">
@@ -610,11 +813,11 @@
             <div style="height:62px;background:var(--surface-2);border-radius:6px;border:1px solid var(--border);overflow:hidden;position:relative"><div class="shimmer" style="animation-delay:.45s"></div></div>
             <div style="height:62px;background:var(--surface-2);border-radius:6px;border:1px solid var(--border);overflow:hidden;position:relative"><div class="shimmer" style="animation-delay:.6s"></div></div>
           </div>
-          <div style="margin-top:10px;font-size:11px;color:var(--text-3);text-align:center;font-family:'DM Mono',monospace" id="loading-lbl">Reading emails, calendar, and tasks…</div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-3);text-align:center;font-family:'DM Mono',monospace" id="loading-lbl">Sending context to your model…</div>
         </div>
 
         <div id="state-error" style="display:none;padding:20px;text-align:center">
-          <div style="font-size:13px;color:var(--text-2);margin-bottom:6px">Couldn't load priorities</div>
+          <div style="font-size:13px;color:var(--text-2);margin-bottom:6px">Couldn't generate priorities</div>
           <div style="font-size:11px;color:var(--text-3)" id="error-msg"></div>
           <button class="btn" onclick="runPriorityAI()" style="margin-top:10px">Try again</button>
         </div>
@@ -626,109 +829,65 @@
 
         <div id="state-empty" style="padding:28px 16px;text-align:center">
           <div style="font-size:28px;margin-bottom:10px;opacity:.22">◎</div>
-          <div style="font-size:13px;font-weight:500;color:var(--text-2);margin-bottom:5px">AI-powered daily priorities</div>
-          <div style="font-size:12px;color:var(--text-3);line-height:1.6;margin-bottom:14px">Claude reads your unread emails, today's calendar, and assigned Asana tasks — then surfaces your real top 5 with reasoning.</div>
+          <div style="font-size:13px;font-weight:500;color:var(--text-2);margin-bottom:5px">Paste live context, get a ranked daily plan</div>
+          <div style="font-size:12px;color:var(--text-3);line-height:1.6;margin-bottom:14px">This panel is no longer seeded with demo content. Add your real notes, inbox snippets, or task list and let the selected AI model turn them into a focused top five.</div>
           <button class="btn primary" onclick="runPriorityAI()">Generate priorities</button>
         </div>
-
       </div>
     </div>
 
+    <div class="panel" id="p-admin" draggable="false">
+      <div class="panel-head">
+        <span class="drag-grip">⠿</span>
+        <span class="panel-label">Admin Desk</span>
+        <span class="chip chip-grey">Pinned until done</span>
+      </div>
+      <div class="panel-body">
+        <div class="priority-composer">
+          <label class="priority-label" for="admin-message-input">Message the admin</label>
+          <textarea class="field-input" id="admin-message-input" placeholder="Drop the task, promise, or follow-up you do not want to lose. If you send it as a task, it stays pinned at the top of your priorities until you mark it done."></textarea>
+          <div class="config-actions">
+            <button class="btn primary" onclick="submitAdminMessage(true)">Send &amp; pin task</button>
+            <button class="btn" onclick="submitAdminMessage(false)">Add note only</button>
+          </div>
+        </div>
+        <div class="config-section">
+          <div class="config-section-title">Pinned Admin Tasks</div>
+          <div id="admin-tasks-list" class="summary-list"></div>
+        </div>
+        <div class="config-section">
+          <div class="config-section-title">Conversation</div>
+          <div id="admin-chat-list" class="summary-list"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- RIGHT: Agents (narrow) -->
   <div class="dash-col narrow" id="col-right">
+    <div class="panel" id="p-briefing" draggable="false">
+      <div class="panel-head">
+        <span class="drag-grip">⠿</span>
+        <span class="panel-label">Live Briefing</span>
+        <span class="chip chip-grey">Google · Slack · Asana</span>
+      </div>
+      <div class="panel-body">
+        <div id="briefing-feed"></div>
+      </div>
+    </div>
 
     <div class="panel" id="p-agents" draggable="false">
       <div class="panel-head">
         <span class="drag-grip">⠿</span>
-        <span class="panel-label">AI Agents</span>
-        <span class="chip chip-green">3 running</span>
+        <span class="panel-label">Connection Readiness</span>
+        <span class="chip chip-grey" id="service-connected-count">0 connected</span>
       </div>
       <div class="panel-body">
-        <div class="agents-list">
-
-          <div class="agent-card running">
-            <div class="agent-row">
-              <div class="agent-name">Slack Digest</div>
-              <div class="agent-status running"><div class="status-pip"></div> Running</div>
-            </div>
-            <div class="agent-desc">Compiles daily standups from channel check-ins</div>
-            <div class="agent-foot">
-              <div class="agent-last">Today 7:02 AM</div>
-              <button class="agent-btn">Stop</button>
-            </div>
-          </div>
-
-          <div class="agent-card running">
-            <div class="agent-row">
-              <div class="agent-name">Task Triage</div>
-              <div class="agent-status running"><div class="status-pip"></div> Running</div>
-            </div>
-            <div class="agent-desc">Pulls Asana + Slack tasks, prioritizes by urgency</div>
-            <div class="agent-foot">
-              <div class="agent-last">Today 7:00 AM</div>
-              <button class="agent-btn">Stop</button>
-            </div>
-          </div>
-
-          <div class="agent-card running">
-            <div class="agent-row">
-              <div class="agent-name">Mail Classifier</div>
-              <div class="agent-status running"><div class="status-pip"></div> Running</div>
-            </div>
-            <div class="agent-desc">Flags priority Gmail threads for action</div>
-            <div class="agent-foot">
-              <div class="agent-last">Today 6:55 AM</div>
-              <button class="agent-btn">Stop</button>
-            </div>
-          </div>
-
-          <div class="agent-card queued">
-            <div class="agent-row">
-              <div class="agent-name">Calendar Prep</div>
-              <div class="agent-status queued"><div class="status-pip"></div> Queued</div>
-            </div>
-            <div class="agent-desc">Summarizes upcoming meetings and pulls context</div>
-            <div class="agent-foot">
-              <div class="agent-last">Yesterday 5:00 PM</div>
-              <button class="agent-btn">Run</button>
-            </div>
-          </div>
-
-          <div class="agent-card idle">
-            <div class="agent-row">
-              <div class="agent-name">Weekly Report</div>
-              <div class="agent-status idle"><div class="status-pip"></div> Idle</div>
-            </div>
-            <div class="agent-desc">End-of-week summary from all data sources</div>
-            <div class="agent-foot">
-              <div class="agent-last">Fri 4:30 PM</div>
-              <button class="agent-btn">Run</button>
-            </div>
-          </div>
-
-          <div class="agent-card idle">
-            <div class="agent-row">
-              <div class="agent-name">Team Pulse</div>
-              <div class="agent-status idle"><div class="status-pip"></div> Idle</div>
-            </div>
-            <div class="agent-desc">Monitors Slack sentiment, flags blockers</div>
-            <div class="agent-foot">
-              <div class="agent-last">Mon 8:00 AM</div>
-              <button class="agent-btn">Run</button>
-            </div>
-          </div>
-
-        </div>
+        <div class="agents-list" id="service-list"></div>
       </div>
     </div>
-
   </div>
-
 </div>
 
-<!-- SETTINGS OVERLAY -->
 <div class="settings-overlay" id="settings-overlay"></div>
 
 <div class="settings-drawer" id="settings-drawer">
@@ -736,230 +895,369 @@
     <div class="settings-back" onclick="closeSettings()">←</div>
     <div>
       <div class="settings-title">Integrations</div>
-      <div class="settings-sub">Manage connections to your tools</div>
+      <div class="settings-sub">Manage local connection settings for your dashboard</div>
     </div>
   </div>
 
-  <!-- Integration tabs -->
   <div class="int-tabs">
-    <div class="int-tab active" id="tab-n8n"    onclick="switchTab('n8n')">   <div class="int-tab-dot" id="tdot-n8n"   ></div> n8n</div>
-    <div class="int-tab"        id="tab-slack"  onclick="switchTab('slack')"> <div class="int-tab-dot" id="tdot-slack" ></div> Slack</div>
-    <div class="int-tab"        id="tab-asana"  onclick="switchTab('asana')"> <div class="int-tab-dot" id="tdot-asana" ></div> Asana</div>
-    <div class="int-tab"        id="tab-google" onclick="switchTab('google')"><div class="int-tab-dot" id="tdot-google"></div> Google</div>
+    <div class="int-tab active" id="tab-openai" onclick="switchTab('openai')"><div class="int-tab-dot" id="tdot-openai"></div> AI</div>
+    <div class="int-tab" id="tab-n8n" onclick="switchTab('n8n')"><div class="int-tab-dot" id="tdot-n8n"></div> n8n</div>
+    <div class="int-tab" id="tab-slack" onclick="switchTab('slack')"><div class="int-tab-dot" id="tdot-slack"></div> Slack</div>
+    <div class="int-tab" id="tab-asana" onclick="switchTab('asana')"><div class="int-tab-dot" id="tdot-asana"></div> Asana</div>
+    <div class="int-tab" id="tab-google" onclick="switchTab('google')"><div class="int-tab-dot" id="tdot-google"></div> Google</div>
     <a href="https://forms.gle/wG1ioZo3uNUCy7LaA" target="_blank" class="need-conn-tab">Need a connection? →</a>
   </div>
 
   <div class="settings-body">
-
-    <!-- n8n -->
-    <div class="int-pane active" id="pane-n8n">
+    <div class="int-pane active" id="pane-openai">
       <div class="int-hero">
-        <div class="int-logo" style="background:#f0faf5">⚡</div>
+        <div class="int-logo" style="background:#eef5ef">◎</div>
         <div>
-          <div class="int-hero-name">n8n</div>
-          <div class="int-hero-desc">Workflow automation platform. Connects your AI agents to Slack, Asana, Gmail, and other tools.</div>
+          <div class="int-hero-name" id="openai-hero-name">AI Models · OpenAI</div>
+          <div class="int-hero-desc" id="openai-hero-desc">Choose OpenAI or Ollama for priority ranking and semantic retrieval. The selected provider is stored by the Electron backend and can be tested from here.</div>
         </div>
       </div>
-      <div class="int-status-bar connected" id="status-n8n">
-        <div class="int-status-icon">✓</div>
+      <div class="int-status-bar disconnected" id="status-openai">
+        <div class="int-status-icon" id="status-icon-openai">○</div>
         <div class="int-status-text">
-          <div class="int-status-label">Connected</div>
-          <div class="int-status-detail" id="status-detail-n8n">Last sync: today 7:02 AM · 6 active workflows</div>
+          <div class="int-status-label" id="status-label-openai">Not connected</div>
+          <div class="int-status-detail" id="status-detail-openai">Choose a provider, save its connection details locally, then run a test request.</div>
         </div>
-        <button class="connect-btn do-disconnect" onclick="toggleConnection('n8n')">Disconnect</button>
+        <div class="status-actions">
+          <button class="connect-btn do-connect" id="openai-test-btn" onclick="testOpenAI()">Test provider</button>
+          <button class="connect-btn do-disconnect" id="openai-disconnect-btn" onclick="disconnectOpenAI()" style="display:none">Disconnect</button>
+        </div>
       </div>
       <div class="config-section">
         <div class="config-section-title">Connection</div>
         <div class="field-row">
-          <label class="field-label">n8n Instance URL</label>
-          <input class="field-input" id="n8n-url" type="text" value="http://localhost:5678" placeholder="https://your-n8n-instance.com">
-          <div class="field-hint">Your self-hosted or cloud n8n URL</div>
+          <label class="field-label" for="openai-provider">Provider</label>
+          <select class="field-input" id="openai-provider" data-service="openai" data-field="provider" onchange="setAIProvider(this.value)">
+            <option value="openai">OpenAI</option>
+            <option value="ollama">Ollama</option>
+          </select>
+          <div class="field-hint">OpenAI uses your API key. Ollama uses your local model running on your machine.</div>
+        </div>
+        <div class="field-row" id="row-openai-apiKey">
+          <label class="field-label" for="openai-apiKey">API Key</label>
+          <input class="field-input" id="openai-apiKey" data-service="openai" data-field="apiKey" type="password" placeholder="sk-...">
+          <div class="field-hint" id="openai-apiKey-hint">Used for OpenAI requests only. Ollama runs locally without an API key.</div>
         </div>
         <div class="field-row">
-          <label class="field-label">API Key</label>
-          <input class="field-input" id="n8n-key" type="password" value="n8n_api_••••••••••••••••" placeholder="n8n_api_...">
-          <div class="field-hint">Found in n8n → Settings → API</div>
+          <label class="field-label" for="openai-model">Model</label>
+          <input class="field-input" id="openai-model" data-service="openai" data-field="model" type="text" placeholder="gpt-5-mini">
+          <div class="field-hint" id="openai-model-hint">Default model for connection tests and daily priority ranking.</div>
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="openai-embeddingsModel">Embeddings Model</label>
+          <input class="field-input" id="openai-embeddingsModel" data-service="openai" data-field="embeddingsModel" type="text" placeholder="text-embedding-3-small">
+          <div class="field-hint" id="vector-summary-hint">The semantic index will try provider embeddings first and fall back to a local hash vector if needed.</div>
+        </div>
+        <div class="field-row" id="row-openai-organization">
+          <label class="field-label" for="openai-organization">Organization ID (optional)</label>
+          <input class="field-input" id="openai-organization" data-service="openai" data-field="organization" type="text" placeholder="org_...">
+        </div>
+        <div class="field-row" id="row-openai-project">
+          <label class="field-label" for="openai-project">Project ID (optional)</label>
+          <input class="field-input" id="openai-project" data-service="openai" data-field="project" type="text" placeholder="proj_...">
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="openai-baseURL">Base URL</label>
+          <input class="field-input" id="openai-baseURL" data-service="openai" data-field="baseURL" type="text" placeholder="https://api.openai.com/v1">
+          <div class="field-hint" id="openai-baseURL-hint">Leave the default unless you intentionally proxy OpenAI somewhere else.</div>
+        </div>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Behavior</div>
+        <div class="field-row">
+          <label class="field-label" for="openai-systemPrompt">System prompt</label>
+          <textarea class="field-input" id="openai-systemPrompt" data-service="openai" data-field="systemPrompt" placeholder="You are a concise executive assistant..."></textarea>
+          <div class="field-hint">Used when the dashboard turns your pasted notes into a ranked daily action list.</div>
+        </div>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Semantic Memory</div>
+        <div class="response-preview" id="vector-summary">No semantic memory has been built yet. Sync Google, Asana, or Slack, then reindex.</div>
+        <div class="status-actions" style="margin-top:12px">
+          <button class="connect-btn do-connect" id="vector-reindex-btn" onclick="reindexVectors()">Reindex memory</button>
+        </div>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Last response</div>
+        <div class="response-preview" id="openai-last-response">No test has been run yet.</div>
+      </div>
+    </div>
+
+    <div class="int-pane" id="pane-n8n">
+      <div class="int-hero">
+        <div class="int-logo" style="background:#f0faf5">⚡</div>
+        <div>
+          <div class="int-hero-name">n8n</div>
+          <div class="int-hero-desc">Save the n8n details you plan to wire in later. This app now persists the configuration instead of showing canned demo values.</div>
+        </div>
+      </div>
+      <div class="int-status-bar disconnected" id="status-n8n">
+        <div class="int-status-icon" id="status-icon-n8n">○</div>
+        <div class="int-status-text">
+          <div class="int-status-label" id="status-label-n8n">Not connected</div>
+          <div class="int-status-detail" id="status-detail-n8n">Save your n8n URL and API key to prepare the integration.</div>
+        </div>
+        <button class="connect-btn do-connect" id="toggle-btn-n8n" onclick="toggleConnection('n8n')">Mark connected</button>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Connection</div>
+        <div class="field-row">
+          <label class="field-label" for="n8n-url">n8n Instance URL</label>
+          <input class="field-input" id="n8n-url" data-service="n8n" data-field="url" type="text" placeholder="https://your-n8n-instance.com">
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="n8n-apiKey">API Key</label>
+          <input class="field-input" id="n8n-apiKey" data-service="n8n" data-field="apiKey" type="password" placeholder="n8n_api_...">
+          <div class="field-hint">Saved locally so this shell can be wired to live workflows next.</div>
         </div>
       </div>
       <div class="config-section">
         <div class="config-section-title">Permissions</div>
         <div class="toggle-row">
-          <div class="toggle-info"><div class="toggle-name">Read workflows</div><div class="toggle-desc">View agent names, status, and last run times</div></div>
-          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          <div class="toggle-info"><div class="toggle-name">Read workflows</div><div class="toggle-desc">Allow the dashboard to list workflows and their state.</div></div>
+          <button class="toggle" data-service="n8n" data-permission="readWorkflows"></button>
         </div>
         <div class="toggle-row">
-          <div class="toggle-info"><div class="toggle-name">Trigger workflows</div><div class="toggle-desc">Start or stop agents from the dashboard</div></div>
-          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          <div class="toggle-info"><div class="toggle-name">Trigger workflows</div><div class="toggle-desc">Enable start and stop actions for future automations.</div></div>
+          <button class="toggle" data-service="n8n" data-permission="triggerWorkflows"></button>
         </div>
         <div class="toggle-row">
-          <div class="toggle-info"><div class="toggle-name">Execution history</div><div class="toggle-desc">Show last run timestamps on agent cards</div></div>
-          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          <div class="toggle-info"><div class="toggle-name">Execution history</div><div class="toggle-desc">Keep room for run history in the UI once the backend is wired.</div></div>
+          <button class="toggle" data-service="n8n" data-permission="executionHistory"></button>
         </div>
       </div>
     </div>
 
-    <!-- Slack -->
     <div class="int-pane" id="pane-slack">
       <div class="int-hero">
         <div class="int-logo" style="background:#f0f4ff">#</div>
         <div>
           <div class="int-hero-name">Slack</div>
-          <div class="int-hero-desc">Team messaging. Used to compile daily standup summaries via your AI Digest agent.</div>
+          <div class="int-hero-desc">The connect button opens Slack’s official sign-in and consent page in your browser. Slack still needs a hosted HTTPS redirect URI for desktop OAuth.</div>
         </div>
       </div>
-      <div class="int-status-bar connected" id="status-slack">
-        <div class="int-status-icon">✓</div>
+      <div class="int-status-bar disconnected" id="status-slack">
+        <div class="int-status-icon" id="status-icon-slack">○</div>
         <div class="int-status-text">
-          <div class="int-status-label">Connected</div>
-          <div class="int-status-detail" id="status-detail-slack">Workspace: Acme Corp · Authorized as <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="84fdebf1c4e5e7e9e1aae7ebe9">[email&#160;protected]</a></div>
+          <div class="int-status-label" id="status-label-slack">Not connected</div>
+          <div class="int-status-detail" id="status-detail-slack">Configure Slack OAuth, then connect to launch Slack in your browser.</div>
         </div>
-        <button class="connect-btn do-disconnect" onclick="toggleConnection('slack')">Disconnect</button>
+        <div class="status-actions">
+          <button class="connect-btn do-connect" id="slack-connect-btn" onclick="connectService('slack')">Connect with Slack</button>
+          <button class="connect-btn do-connect" id="slack-sync-btn" onclick="syncService('slack')">Validate &amp; sync</button>
+          <button class="connect-btn do-disconnect" id="slack-disconnect-btn" onclick="disconnectService('slack')" style="display:none">Disconnect</button>
+        </div>
       </div>
+      <div class="field-hint" id="slack-setup-helper" style="margin:12px 0 0">Slack setup still needs: Client ID, Client Secret, Hosted HTTPS Redirect URI.</div>
       <div class="config-section">
-        <div class="config-section-title">OAuth</div>
+        <div class="config-section-title">Step 1 · Create Or Open Your Slack App</div>
+        <div class="status-actions" style="margin-bottom:12px">
+          <a class="connect-btn do-connect" href="https://api.slack.com/apps" target="_blank" rel="noreferrer">Open Slack App Setup</a>
+          <a class="connect-btn do-connect" href="https://api.slack.com/authentication/oauth-v2" target="_blank" rel="noreferrer">OAuth Guide</a>
+        </div>
+        <div class="field-hint" style="margin-bottom:12px">Slack must redirect back through an HTTPS page you host. That bridge page then relays the result to the running app.</div>
+        <div class="config-section-title">Step 2 · Paste Credentials And Redirect</div>
         <div class="field-row">
-          <label class="field-label">Bot Token</label>
-          <input class="field-input" type="password" value="xoxb-••••••••••••••••" placeholder="xoxb-...">
-          <div class="field-hint">Slack App → OAuth & Permissions → Bot Token</div>
+          <label class="field-label" for="slack-clientId">Client ID</label>
+          <input class="field-input" id="slack-clientId" data-service="slack" data-field="clientId" type="text" placeholder="1234567890.1234567890">
+          <div class="field-hint">Required for Slack browser OAuth.</div>
         </div>
         <div class="field-row">
-          <label class="field-label">Standup Channel</label>
-          <input class="field-input" type="text" value="#team-standup" placeholder="#channel-name">
-          <div class="field-hint">Channel your team posts daily check-ins to</div>
+          <label class="field-label" for="slack-clientSecret">Client Secret</label>
+          <input class="field-input" id="slack-clientSecret" data-service="slack" data-field="clientSecret" type="password" placeholder="client-secret">
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="slack-redirectUri">Hosted Redirect URI</label>
+          <input class="field-input" id="slack-redirectUri" data-service="slack" data-field="redirectUri" type="text" placeholder="https://your-domain.example/slack/callback">
+          <div class="field-hint">Slack’s browser OAuth requires an HTTPS redirect. Host the bridge page there, then this app will relay the result back locally.</div>
+        </div>
+        <div class="config-section-title">Step 3 · Optional Bot Sync Fallback</div>
+        <div class="field-row">
+          <label class="field-label" for="slack-botToken">Bot Token</label>
+          <input class="field-input" id="slack-botToken" data-service="slack" data-field="botToken" type="password" placeholder="xoxb-...">
+          <div class="field-hint">This is the practical local-desktop option today for pulling messages into the app.</div>
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="slack-standupChannel">Standup Channel</label>
+          <input class="field-input" id="slack-standupChannel" data-service="slack" data-field="standupChannel" type="text" placeholder="#team-standup">
         </div>
       </div>
       <div class="config-section">
         <div class="config-section-title">Permissions</div>
         <div class="toggle-row">
-          <div class="toggle-info"><div class="toggle-name">Read channel messages</div><div class="toggle-desc">Pull standup messages for AI summarization</div></div>
-          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          <div class="toggle-info"><div class="toggle-name">Read channel messages</div><div class="toggle-desc">Required for standup and digest summaries.</div></div>
+          <button class="toggle" data-service="slack" data-permission="readChannelMessages"></button>
         </div>
         <div class="toggle-row">
-          <div class="toggle-info"><div class="toggle-name">Read direct messages</div><div class="toggle-desc">Surface DMs flagged as action items</div></div>
-          <button class="toggle" onclick="this.classList.toggle('on')"></button>
+          <div class="toggle-info"><div class="toggle-name">Read direct messages</div><div class="toggle-desc">Reserved for future action-item detection.</div></div>
+          <button class="toggle" data-service="slack" data-permission="readDirectMessages"></button>
         </div>
         <div class="toggle-row">
-          <div class="toggle-info"><div class="toggle-name">Post messages</div><div class="toggle-desc">Allow agents to send reminders to channels</div></div>
-          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          <div class="toggle-info"><div class="toggle-name">Post messages</div><div class="toggle-desc">Allows this dashboard to post reminders or summaries later.</div></div>
+          <button class="toggle" data-service="slack" data-permission="postMessages"></button>
         </div>
       </div>
       <div class="config-section">
-        <div class="config-section-title">OAuth Scopes Granted</div>
-        <div class="scope-list">
-          <span class="scope-tag">channels:read</span>
-          <span class="scope-tag">channels:history</span>
-          <span class="scope-tag">chat:write</span>
-          <span class="scope-tag">users:read</span>
-        </div>
+        <div class="config-section-title">Preview</div>
+        <div class="response-preview" id="preview-slack">No Slack data loaded yet.</div>
       </div>
     </div>
 
-    <!-- Asana -->
     <div class="int-pane" id="pane-asana">
       <div class="int-hero">
         <div class="int-logo" style="background:#fff2f0">✦</div>
         <div>
           <div class="int-hero-name">Asana</div>
-          <div class="int-hero-desc">Project and task management. Provides your assigned tasks to the AI priority engine.</div>
+          <div class="int-hero-desc">Dashboard will try an in-app Asana sign-in window first, then fall back to your browser if Asana blocks or redirects out of the embedded flow.</div>
         </div>
       </div>
-      <div class="int-status-bar connected" id="status-asana">
-        <div class="int-status-icon">✓</div>
+      <div class="int-status-bar disconnected" id="status-asana">
+        <div class="int-status-icon" id="status-icon-asana">○</div>
         <div class="int-status-text">
-          <div class="int-status-label">Connected</div>
-          <div class="int-status-detail" id="status-detail-asana">Workspace: Acme Corp · 12 tasks assigned to you</div>
+          <div class="int-status-label" id="status-label-asana">Not connected</div>
+          <div class="int-status-detail" id="status-detail-asana">Add your app credentials, then sign in with Asana. Dashboard may use an in-app window or fall back to your browser.</div>
         </div>
-        <button class="connect-btn do-disconnect" onclick="toggleConnection('asana')">Disconnect</button>
+        <div class="status-actions">
+          <button class="connect-btn do-connect" id="asana-connect-btn" onclick="connectService('asana')">Sign in with Asana</button>
+          <button class="connect-btn do-connect" id="asana-sync-btn" onclick="syncService('asana')">Sync data</button>
+          <button class="connect-btn do-disconnect" id="asana-disconnect-btn" onclick="disconnectService('asana')" style="display:none">Disconnect</button>
+        </div>
+      </div>
+      <div class="field-hint" id="asana-setup-helper" style="margin:12px 0 0">Asana setup still needs: Client ID, Client Secret, Redirect URI.</div>
+      <div class="config-section">
+        <div class="config-section-title">Step 1 · Create Or Open Your Asana App</div>
+        <div class="status-actions" style="margin-bottom:12px">
+          <a class="connect-btn do-connect" href="https://app.asana.com/0/my-apps" target="_blank" rel="noreferrer">Open Asana Apps</a>
+          <a class="connect-btn do-connect" href="https://developers.asana.com/docs/oauth" target="_blank" rel="noreferrer">OAuth Guide</a>
+        </div>
+        <div class="config-section-title">Step 2 · Paste Credentials</div>
+        <div class="field-row">
+          <label class="field-label" for="asana-clientId">Client ID</label>
+          <input class="field-input" id="asana-clientId" data-service="asana" data-field="clientId" type="text" placeholder="1234567890">
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="asana-clientSecret">Client Secret</label>
+          <input class="field-input" id="asana-clientSecret" data-service="asana" data-field="clientSecret" type="password" placeholder="client-secret">
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="asana-redirectUri">Redirect URI</label>
+          <input class="field-input" id="asana-redirectUri" data-service="asana" data-field="redirectUri" type="text" placeholder="http://127.0.0.1:3456/oauth/asana/callback">
+          <div class="field-hint">Add this redirect URI in your Asana app settings before signing in.</div>
+        </div>
+        <div class="status-actions" style="margin-top:12px">
+          <button class="connect-btn do-connect" onclick="copyFieldValue('asana-redirectUri', 'Asana redirect URI')">Copy redirect URI</button>
+        </div>
       </div>
       <div class="config-section">
-        <div class="config-section-title">Connection</div>
+        <div class="config-section-title">Step 3 · Optional Token Fallback</div>
         <div class="field-row">
-          <label class="field-label">Personal Access Token</label>
-          <input class="field-input" type="password" value="1/••••••••••••••••" placeholder="1/...">
-          <div class="field-hint">Asana → My Profile → Apps → Developer Apps</div>
+          <label class="field-label" for="asana-personalAccessToken">Personal Access Token</label>
+          <input class="field-input" id="asana-personalAccessToken" data-service="asana" data-field="personalAccessToken" type="password" placeholder="1/...">
+          <div class="field-hint">Optional. If you already have a PAT, you can skip OAuth and sync directly.</div>
         </div>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Workspace</div>
         <div class="field-row">
-          <label class="field-label">Workspace GID</label>
-          <input class="field-input" type="text" value="123456789" placeholder="Workspace ID">
-          <div class="field-hint">Found in your Asana workspace URL</div>
+          <label class="field-label" for="asana-workspaceGid">Workspace GID</label>
+          <input class="field-input" id="asana-workspaceGid" data-service="asana" data-field="workspaceGid" type="text" placeholder="Workspace ID">
+          <div class="field-hint">Optional. Leave blank and the app will use the first available workspace when it syncs.</div>
         </div>
       </div>
       <div class="config-section">
         <div class="config-section-title">Data Scope</div>
         <div class="toggle-row">
-          <div class="toggle-info"><div class="toggle-name">Tasks assigned to me</div><div class="toggle-desc">Feed personal tasks to the AI priority engine</div></div>
-          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          <div class="toggle-info"><div class="toggle-name">Tasks assigned to me</div><div class="toggle-desc">Use your own tasks as inputs for daily ranking.</div></div>
+          <button class="toggle" data-service="asana" data-permission="assignedTasks"></button>
         </div>
         <div class="toggle-row">
-          <div class="toggle-info"><div class="toggle-name">Team tasks</div><div class="toggle-desc">Include tasks across your team for blocker detection</div></div>
-          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          <div class="toggle-info"><div class="toggle-name">Team tasks</div><div class="toggle-desc">Reserve team-wide visibility for blocker detection later.</div></div>
+          <button class="toggle" data-service="asana" data-permission="teamTasks"></button>
         </div>
         <div class="toggle-row">
-          <div class="toggle-info"><div class="toggle-name">Mark tasks complete</div><div class="toggle-desc">Checking off a priority item updates it in Asana</div></div>
-          <button class="toggle" onclick="this.classList.toggle('on')"></button>
+          <div class="toggle-info"><div class="toggle-name">Mark tasks complete</div><div class="toggle-desc">Allow the dashboard to push completion state back to Asana.</div></div>
+          <button class="toggle" data-service="asana" data-permission="markTasksComplete"></button>
         </div>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Preview</div>
+        <div class="response-preview" id="preview-asana">No Asana data loaded yet.</div>
       </div>
     </div>
 
-    <!-- Google -->
     <div class="int-pane" id="pane-google">
       <div class="int-hero">
         <div class="int-logo" style="background:#f8f8f8">G</div>
         <div>
           <div class="int-hero-name">Google Workspace</div>
-          <div class="int-hero-desc">Gmail and Calendar. Provides email signals and meeting context to the AI priority engine.</div>
+          <div class="int-hero-desc">Google opens in your default browser by design. Google’s native-app OAuth flow is more reliable there than in an embedded Electron sign-in page.</div>
         </div>
       </div>
       <div class="int-status-bar disconnected" id="status-google">
-        <div class="int-status-icon">○</div>
+        <div class="int-status-icon" id="status-icon-google">○</div>
         <div class="int-status-text">
-          <div class="int-status-label">Not connected</div>
-          <div class="int-status-detail" id="status-detail-google">Connect to enable email + calendar context in AI priorities</div>
+          <div class="int-status-label" id="status-label-google">Not connected</div>
+          <div class="int-status-detail" id="status-detail-google">Add your Google desktop app credentials, then sign in through Google in your browser and sync Gmail + Calendar.</div>
         </div>
-        <button class="connect-btn do-connect" onclick="toggleConnection('google')">Connect with Google</button>
-      </div>
-      <div class="config-section">
-        <div class="config-section-title">OAuth 2.0</div>
-        <div class="field-row">
-          <label class="field-label">Client ID</label>
-          <input class="field-input" type="text" placeholder="your-client-id.apps.googleusercontent.com">
-          <div class="field-hint">Google Cloud Console → Credentials → OAuth Client</div>
-        </div>
-        <div class="field-row">
-          <label class="field-label">Client Secret</label>
-          <input class="field-input" type="password" placeholder="GOCSPX-...">
-        </div>
-        <div class="field-row">
-          <label class="field-label">Redirect URI</label>
-          <input class="field-input" type="text" value="http://localhost:3000/oauth/callback" placeholder="https://...">
+        <div class="status-actions">
+          <button class="connect-btn do-connect" id="google-connect-btn" onclick="connectService('google')">Sign in with Google</button>
+          <button class="connect-btn do-connect" id="google-sync-btn" onclick="syncService('google')">Sync data</button>
+          <button class="connect-btn do-disconnect" id="google-disconnect-btn" onclick="disconnectService('google')" style="display:none">Disconnect</button>
         </div>
       </div>
+      <div class="field-hint" id="google-setup-helper" style="margin:12px 0 0">Google setup still needs: Desktop Client ID, Redirect URI.</div>
       <div class="config-section">
-        <div class="config-section-title">Permissions (once connected)</div>
-        <div class="toggle-row">
-          <div class="toggle-info"><div class="toggle-name">Gmail — read unread</div><div class="toggle-desc">Surface email context in AI priority ranking</div></div>
-          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+        <div class="config-section-title">Step 1 · Create Or Open Google Cloud Credentials</div>
+        <div class="status-actions" style="margin-bottom:12px">
+          <a class="connect-btn do-connect" href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noreferrer">Open Google Cloud Credentials</a>
+          <a class="connect-btn do-connect" href="https://developers.google.com/identity/protocols/oauth2/native-app" target="_blank" rel="noreferrer">OAuth Guide</a>
         </div>
-        <div class="toggle-row">
-          <div class="toggle-info"><div class="toggle-name">Google Calendar — today's events</div><div class="toggle-desc">Pull meeting schedule into priority context</div></div>
-          <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+        <div class="field-hint" style="margin-bottom:12px">Why this opens in the browser: Google’s desktop OAuth flow expects the system browser, then redirects back to the app through the loopback callback below.</div>
+        <div class="config-section-title">Step 2 · Paste The Desktop App Credentials</div>
+        <div class="field-row">
+          <label class="field-label" for="google-clientId">Desktop Client ID</label>
+          <input class="field-input" id="google-clientId" data-service="google" data-field="clientId" type="text" placeholder="your-client-id.apps.googleusercontent.com">
+          <div class="field-hint">Create an installed or desktop app credential in Google Cloud and paste the client ID here.</div>
         </div>
-        <div class="toggle-row">
-          <div class="toggle-info"><div class="toggle-name">Gmail — send replies</div><div class="toggle-desc">Allow agents to draft and send email replies</div></div>
-          <button class="toggle" onclick="this.classList.toggle('on')"></button>
+        <div class="field-row">
+          <label class="field-label" for="google-clientSecret">Client Secret (optional)</label>
+          <input class="field-input" id="google-clientSecret" data-service="google" data-field="clientSecret" type="password" placeholder="GOCSPX-...">
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="google-redirectUri">Redirect URI</label>
+          <input class="field-input" id="google-redirectUri" data-service="google" data-field="redirectUri" type="text" placeholder="http://127.0.0.1:3456/oauth/google/callback">
+          <div class="field-hint">Add this loopback redirect URI to your Google credential before signing in.</div>
+        </div>
+        <div class="status-actions" style="margin-top:12px">
+          <button class="connect-btn do-connect" onclick="copyFieldValue('google-redirectUri', 'Google redirect URI')">Copy redirect URI</button>
         </div>
       </div>
       <div class="config-section">
-        <div class="config-section-title">Required OAuth Scopes</div>
-        <div class="scope-list">
-          <span class="scope-tag">gmail.readonly</span>
-          <span class="scope-tag">calendar.readonly</span>
-          <span class="scope-tag">userinfo.email</span>
+        <div class="config-section-title">Permissions</div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Gmail — read unread</div><div class="toggle-desc">Bring inbound signal into future priority runs.</div></div>
+          <button class="toggle" data-service="google" data-permission="gmailReadUnread"></button>
         </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Google Calendar — today's events</div><div class="toggle-desc">Add meeting context and preparation needs.</div></div>
+          <button class="toggle" data-service="google" data-permission="calendarToday"></button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-name">Gmail — send replies</div><div class="toggle-desc">Reserve outbound mail for a later backend pass.</div></div>
+          <button class="toggle" data-service="google" data-permission="gmailSendReplies"></button>
+        </div>
+      </div>
+      <div class="config-section">
+        <div class="config-section-title">Preview</div>
+        <div class="response-preview" id="preview-google">No Gmail or Calendar data loaded yet.</div>
       </div>
     </div>
-
-  </div><!-- /settings-body -->
+  </div>
 
   <div class="save-row">
     <button class="btn" onclick="closeSettings()">Cancel</button>
@@ -969,421 +1267,6 @@
 
 <div id="toast"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// ── CLOCK & DATE ─────────────────────────────────────────────
-const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const MSHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-function tick() {
-  document.getElementById('clock').textContent =
-    new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-}
-setInterval(tick,1000); tick();
-
-const now = new Date();
-document.getElementById('h-date').textContent = DAYS[now.getDay()]+', '+MONTHS[now.getMonth()]+' '+now.getDate();
-document.getElementById('s-date').textContent  = DAYS[now.getDay()].slice(0,3).toUpperCase()+' '+MSHORT[now.getMonth()].toUpperCase()+' '+now.getDate();
-
-// ── COLUMN DRAG & DROP ───────────────────────────────────────
-// Each .dash-col is a drop zone. Panels can be dragged across
-// columns or reordered within the same column. Hovering over
-// the top/bottom half of a panel inserts before/after it.
-
-let editing = false;
-let dragSrc = null;
-
-function toggleEdit() {
-  editing = !editing;
-  document.body.classList.toggle('editing', editing);
-  const btn = document.getElementById('edit-btn');
-  btn.classList.toggle('active', editing);
-  btn.textContent = editing ? 'Done' : 'Edit Layout';
-  document.querySelectorAll('.panel').forEach(p => p.draggable = editing);
-}
-
-document.addEventListener('dragstart', e => {
-  const p = e.target.closest('.panel');
-  if (!p || !editing) return;
-  dragSrc = p;
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', p.id);
-  setTimeout(() => p.classList.add('dragging'), 0);
-});
-
-document.addEventListener('dragend', () => {
-  if (dragSrc) dragSrc.classList.remove('dragging');
-  document.querySelectorAll('.panel-over').forEach(el => el.classList.remove('panel-over'));
-  document.querySelectorAll('.col-over').forEach(el => el.classList.remove('col-over'));
-  dragSrc = null;
-});
-
-document.querySelectorAll('.dash-col').forEach(col => {
-
-  col.addEventListener('dragover', e => {
-    if (!dragSrc) return;
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-
-    const hoverPanel = e.target.closest('.panel');
-    document.querySelectorAll('.panel-over').forEach(el => el.classList.remove('panel-over'));
-    document.querySelectorAll('.col-over').forEach(el => el.classList.remove('col-over'));
-
-    if (hoverPanel && hoverPanel !== dragSrc) {
-      hoverPanel.classList.add('panel-over');
-    } else {
-      col.classList.add('col-over');
-    }
-  });
-
-  col.addEventListener('dragleave', e => {
-    if (!col.contains(e.relatedTarget)) {
-      col.classList.remove('col-over');
-    }
-  });
-
-  col.addEventListener('drop', e => {
-    e.preventDefault();
-    if (!dragSrc) return;
-
-    document.querySelectorAll('.panel-over').forEach(el => el.classList.remove('panel-over'));
-    document.querySelectorAll('.col-over').forEach(el => el.classList.remove('col-over'));
-
-    const hoverPanel = e.target.closest('.panel');
-
-    if (hoverPanel && hoverPanel !== dragSrc) {
-      const rect = hoverPanel.getBoundingClientRect();
-      if (e.clientY < rect.top + rect.height / 2) {
-        col.insertBefore(dragSrc, hoverPanel);
-      } else {
-        col.insertBefore(dragSrc, hoverPanel.nextSibling);
-      }
-    } else {
-      col.appendChild(dragSrc);
-    }
-
-    toast('Panel moved — save to keep');
-  });
-});
-
-// ── SAVE / RESTORE LAYOUT ────────────────────────────────────
-function saveLayout() {
-  const layout = [...document.querySelectorAll('.dash-col')].map(col => ({
-    id: col.id,
-    panels: [...col.querySelectorAll('.panel')].map(p => p.id)
-  }));
-  localStorage.setItem('cmd-dash-v2', JSON.stringify(layout));
-  toast('Layout saved');
-}
-
-function resetLayout() {
-  localStorage.removeItem('cmd-dash-v2');
-  location.reload();
-}
-
-(function restoreLayout() {
-  const saved = localStorage.getItem('cmd-dash-v2');
-  if (!saved) return;
-  try {
-    JSON.parse(saved).forEach(({ id, panels }) => {
-      const col = document.getElementById(id);
-      if (!col) return;
-      panels.forEach(pid => {
-        const el = document.getElementById(pid);
-        if (el) col.appendChild(el);
-      });
-    });
-  } catch(_) {}
-})();
-
-// ── AGENT BUTTONS ────────────────────────────────────────────
-document.querySelectorAll('.agent-btn').forEach(btn => {
-  btn.addEventListener('click', e => {
-    const card    = e.target.closest('.agent-card');
-    const st      = card.querySelector('.agent-status');
-    const name    = card.querySelector('.agent-name').textContent;
-    const running = card.classList.contains('running');
-    ['running','idle','queued','error'].forEach(c => card.classList.remove(c));
-    if (running) {
-      card.classList.add('idle');
-      st.className = 'agent-status idle';
-      st.innerHTML = '<div class="status-pip"></div> Idle';
-      btn.textContent = 'Run';
-      toast(name + ' stopped');
-    } else {
-      card.classList.add('running');
-      st.className = 'agent-status running';
-      st.innerHTML = '<div class="status-pip"></div> Running';
-      btn.textContent = 'Stop';
-      toast(name + ' started');
-    }
-  });
-});
-
-// ── AI PRIORITY ENGINE ───────────────────────────────────────
-const MOCK = {
-  emails: [
-    { from:"Alex K.",      subject:"Staging deploy still failing — need help",  preview:"Still getting the same env error. Blocking my whole sprint ticket.", unread:true  },
-    { from:"Client Riley", subject:"Re: Review meeting agenda",                  preview:"Confirmed for 2pm. Can we add 10 min for Q&A? Bring the updated roadmap.", unread:true  },
-    { from:"Morgan T.",    subject:"API integration — scope question",           preview:"Before I hand off today — is the auth layer in scope for this sprint?", unread:false },
-  ],
-  calendar: [
-    { title:"Team Standup",    time:"9:00–9:30 AM"   },
-    { title:"Sprint Planning", time:"11:00 AM–12:00 PM" },
-    { title:"Client Review",   time:"2:00–3:00 PM",   notes:"External. Client asked for updated roadmap." },
-    { title:"1:1 with Riley",  time:"4:30–5:00 PM"   },
-  ],
-  asana: [
-    { title:"Resolve staging deploy blocker — Alex's env var issue",   due:"Mar 14 (overdue)", priority:"High"   },
-    { title:"Finalize Q1 project retrospective doc",                   due:"Today EOD",        priority:"High"   },
-    { title:"Review Jamie's design revisions and leave comments",      due:"Today EOD",        priority:"Medium" },
-    { title:"Post sprint planning reminder to team channel",           due:"Today",            priority:"Low"    },
-    { title:"Draft team goals for Q2 kickoff",                         due:"Wed Mar 18",       priority:"Medium" },
-    { title:"Update project status in Asana for stakeholder view",     due:"Fri Mar 20",       priority:"Low"    },
-  ]
-};
-
-const LOADING_STEPS = [
-  "Reading unread emails…",
-  "Scanning today's calendar…",
-  "Loading Asana tasks…",
-  "Weighing urgency and context…",
-  "Ranking your top 5…"
-];
-
-function showState(id) {
-  ['state-loading','state-error','state-results','state-empty'].forEach(s =>
-    document.getElementById(s).style.display = s === id ? 'block' : 'none'
-  );
-}
-
-async function runPriorityAI() {
-  showState('state-loading');
-  const btn = document.getElementById('refresh-btn');
-  btn.disabled = true; btn.textContent = '…';
-
-  const lbl = document.getElementById('loading-lbl');
-  let step = 0;
-  const timer = setInterval(() => {
-    if (step < LOADING_STEPS.length) lbl.textContent = LOADING_STEPS[step++];
-  }, 700);
-
-  const today = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
-
-  const prompt = `You are an executive assistant AI. Based on the data below, identify and rank the top 5 most important tasks or actions for the user to focus on TODAY (${today}).
-
-Consider: overdue items, unread emails needing response, upcoming meetings requiring prep, blocked teammates, and cross-source signals (e.g. a client email + a meeting with that client = higher combined priority).
-
-UNREAD EMAILS:
-${MOCK.emails.map(e=>`- From: ${e.from} | Subject: "${e.subject}" | Preview: "${e.preview}" | Unread: ${e.unread}`).join('\n')}
-
-TODAY'S CALENDAR:
-${MOCK.calendar.map(e=>`- ${e.title} at ${e.time}${e.notes?' | Note: '+e.notes:''}`).join('\n')}
-
-ASANA TASKS ASSIGNED TO ME:
-${MOCK.asana.map(t=>`- "${t.title}" | Due: ${t.due} | Priority: ${t.priority}`).join('\n')}
-
-Respond ONLY with a valid JSON object — no markdown fences, no text outside the JSON:
-{
-  "rationale": "One sentence explaining the prioritization logic.",
-  "tasks": [
-    {
-      "rank": 1,
-      "title": "Short, action-oriented task title",
-      "why": "One sentence referencing specific signals from the data above.",
-      "source": "gmail|asana|calendar",
-      "due": "Time or date string",
-      "urgency": "urgent|soon|normal"
-    }
-  ]
-}`;
-
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [{ role:"user", content: prompt }]
-      })
-    });
-
-    clearInterval(timer);
-    if (!res.ok) throw new Error(`API ${res.status}`);
-
-    const data   = await res.json();
-    const raw    = data.content.map(b=>b.text||'').join('');
-    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
-
-    renderPriorities(parsed);
-    document.getElementById('priority-ts').textContent =
-      'Updated ' + new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-
-  } catch(err) {
-    clearInterval(timer);
-    showState('state-error');
-    document.getElementById('error-msg').textContent = err.message || 'Something went wrong.';
-  }
-
-  btn.disabled = false; btn.textContent = '↻ Refresh';
-}
-
-function renderPriorities(data) {
-  document.getElementById('p-rationale').textContent = data.rationale || '';
-  const list = document.getElementById('p-list');
-  list.innerHTML = '';
-
-  const srcMap   = { gmail:'Gmail', asana:'Asana', calendar:'Calendar', slack:'Slack' };
-  const classMap = { gmail:'src-gmail', asana:'src-asana', calendar:'src-calendar', slack:'src-slack' };
-
-  (data.tasks||[]).slice(0,5).forEach((t,i) => {
-    const dc = t.urgency==='urgent'?'urgent':t.urgency==='soon'?'soon':'';
-    const card = document.createElement('div');
-    card.className = 'priority-card';
-    card.style.animationDelay = (i*.07)+'s';
-    card.innerHTML = `
-      <div class="priority-rank">${t.rank}</div>
-      <div class="p-check" onclick="checkPriority(this)"></div>
-      <div class="p-body">
-        <div class="p-title">${t.title}</div>
-        <div class="p-why">${t.why}</div>
-        <div class="p-meta">
-          <span class="p-src ${classMap[t.source]||'src-asana'}">${srcMap[t.source]||t.source}</span>
-          ${t.due?`<span class="p-due ${dc}">${t.due}</span>`:''}
-        </div>
-      </div>`;
-    list.appendChild(card);
-  });
-
-  showState('state-results');
-}
-
-function checkPriority(el) {
-  el.classList.toggle('done');
-  el.textContent = el.classList.contains('done') ? '✓' : '';
-  el.closest('.priority-card').querySelector('.p-title').classList.toggle('done');
-}
-
-
-// ── INTEGRATION SETTINGS ─────────────────────────────────────
-
-// Connection state — persisted to localStorage
-const CONNECTIONS = JSON.parse(localStorage.getItem('connections') || JSON.stringify({
-  n8n:    { connected: true  },
-  slack:  { connected: true  },
-  asana:  { connected: true  },
-  google: { connected: false }
-}));
-
-const INT_COLORS = {
-  n8n:    'var(--green)',
-  slack:  'var(--blue)',
-  asana:  '#e8534a',
-  google: 'var(--border-2)'
-};
-
-let activeTab = 'n8n';
-
-function syncHeaderDots() {
-  Object.keys(CONNECTIONS).forEach(key => {
-    const dot = document.getElementById('dot-' + key);
-    if (!dot) return;
-    if (CONNECTIONS[key].connected) {
-      dot.className = 'h-dot on';
-    } else {
-      dot.className = 'h-dot off';
-    }
-  });
-}
-syncHeaderDots();
-
-function syncTabDots() {
-  Object.keys(CONNECTIONS).forEach(key => {
-    const tdot = document.getElementById('tdot-' + key);
-    if (!tdot) return;
-    tdot.style.background = CONNECTIONS[key].connected ? 'var(--green)' : 'var(--border-2)';
-  });
-}
-
-function openSettings(tab) {
-  document.getElementById('settings-overlay').classList.add('open');
-  document.getElementById('settings-drawer').classList.add('open');
-  switchTab(tab || activeTab);
-  syncTabDots();
-}
-
-function closeSettings(e) {
-  document.getElementById('settings-overlay').classList.remove('open');
-  document.getElementById('settings-drawer').classList.remove('open');
-}
-
-function switchTab(key) {
-  activeTab = key;
-  document.querySelectorAll('.int-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.int-pane').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + key).classList.add('active');
-  document.getElementById('pane-' + key).classList.add('active');
-}
-
-function toggleConnection(key) {
-  const was = CONNECTIONS[key].connected;
-  CONNECTIONS[key].connected = !was;
-  localStorage.setItem('connections', JSON.stringify(CONNECTIONS));
-
-  const bar = document.getElementById('status-' + key);
-  const detail = document.getElementById('status-detail-' + key);
-  const connectBtn = bar.querySelector('.connect-btn');
-
-  if (CONNECTIONS[key].connected) {
-    bar.className = 'int-status-bar connected';
-    bar.querySelector('.int-status-icon').textContent = '✓';
-    bar.querySelector('.int-status-label').textContent = 'Connected';
-    if (detail) detail.textContent = 'Connected just now';
-    connectBtn.className = 'connect-btn do-disconnect';
-    connectBtn.textContent = 'Disconnect';
-    toast(key.charAt(0).toUpperCase() + key.slice(1) + ' connected');
-  } else {
-    bar.className = 'int-status-bar disconnected';
-    bar.querySelector('.int-status-icon').textContent = '○';
-    bar.querySelector('.int-status-label').textContent = 'Not connected';
-    if (detail) detail.textContent = 'Connect to enable this integration';
-    connectBtn.className = 'connect-btn do-connect';
-    connectBtn.textContent = key === 'google' ? 'Connect with Google' : 'Connect';
-    toast(key.charAt(0).toUpperCase() + key.slice(1) + ' disconnected');
-  }
-
-  syncHeaderDots();
-  syncTabDots();
-}
-
-function saveIntegration() {
-  localStorage.setItem('connections', JSON.stringify(CONNECTIONS));
-  toast('Integration settings saved');
-  closeSettings();
-}
-
-// Close on Escape key
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeSettings();
-});
-
-// ── PILL & OVERLAY LISTENERS ──────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  ['n8n','slack','asana','google'].forEach(key => {
-    const pill = document.getElementById('pill-' + key);
-    if (pill) pill.addEventListener('click', () => openSettings(key));
-  });
-  document.getElementById('settings-overlay').addEventListener('click', () => closeSettings());
-});
-
-// ── TOAST ─────────────────────────────────────────────────────
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.classList.remove('show'), 2200);
-}
-</script>
+<script src="renderer.js"></script>
 </body>
 </html>
